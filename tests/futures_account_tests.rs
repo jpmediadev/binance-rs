@@ -131,7 +131,7 @@ mod tests {
     fn custom_order() {
         let mock_custom_order = mock("POST", "/fapi/v1/order")
             .with_header("content-type", "application/json;charset=UTF-8")
-            .match_query(Matcher::Regex("closePosition=TRUE&recvWindow=1234&side=SELL&stopPrice=7.4&symbol=SRMUSDT&timestamp=\\d+&type=STOP_MARKET".into()))
+            .match_query(Matcher::Regex("closePosition=TRUE&newClientOrderId=42&recvWindow=1234&side=SELL&stopPrice=7.4&symbol=SRMUSDT&timestamp=\\d+&type=STOP_MARKET".into()))
             .with_body_from_file("tests/mocks/futures/account/stop_market_close_position_sell.json")
             .create();
 
@@ -155,6 +155,7 @@ mod tests {
             callback_rate: None,
             working_type: None,
             price_protect: None,
+            order_id: Some("42".into())
         };
         let transaction: Transaction = account.custom_order(custom_order).unwrap();
 
