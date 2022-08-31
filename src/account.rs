@@ -49,6 +49,7 @@ impl From<OrderType> for String {
     }
 }
 
+#[derive(Clone)]
 pub enum OrderSide {
     Buy,
     Sell,
@@ -63,6 +64,7 @@ impl From<OrderSide> for String {
     }
 }
 
+#[derive(Clone)]
 #[allow(clippy::all)]
 pub enum TimeInForce {
     GTC,

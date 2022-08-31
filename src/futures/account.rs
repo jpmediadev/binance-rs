@@ -37,6 +37,7 @@ impl From<ContractType> for String {
     }
 }
 
+#[derive(Clone)]
 pub enum PositionSide {
     Both,
     Long,
@@ -52,7 +53,7 @@ impl From<PositionSide> for String {
         }
     }
 }
-
+#[derive(Clone)]
 pub enum OrderType {
     Limit,
     Market,
@@ -76,7 +77,7 @@ impl From<OrderType> for String {
         }
     }
 }
-
+#[derive(Clone)]
 pub enum WorkingType {
     MarkPrice,
     ContractPrice,
@@ -108,7 +109,7 @@ struct OrderRequest {
     pub price_protect: Option<f64>,
     pub order_id: Option<String>
 }
-
+#[derive(Clone)]
 pub struct CustomOrderRequest {
     pub symbol: String,
     pub side: OrderSide,
