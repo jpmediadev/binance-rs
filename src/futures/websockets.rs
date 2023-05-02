@@ -227,13 +227,16 @@ impl<'a> FuturesWebSockets<'a> {
                     Message::Ping(_) => {
                         socket.0.write_message(Message::Pong(vec![])).unwrap();
                     }
-                    Message::Pong(_) | Message::Binary(_) => (),
+                    Message::Pong(_) =>{ println!("pong reply {message}")},
+                    Message::Binary(_) => (),
                     Message::Close(e) => bail!(format!("Disconnected {:?}", e))
                 },
                 Err(e) => {
                     // Таймаут истек; вы можете обработать эту ситуацию, например, закрыть соединение
                     // и повторно подключиться
-                    bail!(format!("WebSocket read timeout: {}", e));
+                    socket.0.write_message(Message::Ping(vec![])).unwrap();
+                    println!("send ping....");
+
                 }
             }
         }
