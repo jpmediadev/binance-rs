@@ -214,39 +214,41 @@ impl<'a> FuturesWebSockets<'a> {
     }
 
     pub fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
-    while running.load(Ordering::Relaxed) {
-        if let Some(ref mut socket) = self.socket {
-            let message = socket.0.read_message();
-            match message {
-                Ok(message) => match message {
-                    Message::Text(msg) => {
-                        if let Err(e) = self.handle_msg(&msg) {
-                            bail!(format!("Error on handling stream message: {}", e));
+        let mut ping_counter = 0;
+
+        while running.load(Ordering::Relaxed) {
+            if let Some(ref mut socket) = self.socket {
+                let message = socket.0.read_message();
+                match message {
+                    Ok(message) => match message {
+                        Message::Text(msg) => {
+                            if let Err(e) = self.handle_msg(&msg) {
+                                bail!(format!("Error on handling stream message: {}", e));
+                            }
+                        }
+                        Message::Ping(_) => {
+                            socket.0.write_message(Message::Pong(vec![])).unwrap();
+                        }
+                        Message::Pong(_) => {
+                            ping_counter = 0;
+                        }
+                        Message::Binary(_) => (),
+                        Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
+                    },
+                    Err(e) => {
+                        // Таймаут истек; вы можете обработать эту ситуацию, например, закрыть соединение
+                        // и повторно подключиться
+                        socket.0.write_message(Message::Ping(vec![])).unwrap();
+                        ping_counter += 1;
+                        println!("ping_counter: {ping_counter}");
+
+                        if ping_counter >= 3{
+                            bail!("Disconnected loop is dead");
                         }
                     }
-                    Message::Ping(_) => {
-                        socket.0.write_message(Message::Pong(vec![])).unwrap();
-                    }
-                    Message::Pong(_) =>{ println!("pong reply {message}")},
-                    Message::Binary(_) => (),
-                    Message::Close(e) => bail!(format!("Disconnected {:?}", e))
-                },
-                Err(e) => {
-                    // Таймаут истек; вы можете обработать эту ситуацию, например, закрыть соединение
-                    // и повторно подключиться
-                    socket.0.write_message(Message::Ping(vec![])).unwrap();
-                    println!("send ping....");
-
                 }
             }
         }
+        bail!("running loop closed");
     }
-    bail!("running loop closed");
-}
-
-
-
-
-
-
 }
