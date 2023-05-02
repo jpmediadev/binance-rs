@@ -230,17 +230,16 @@ impl<'a> FuturesWebSockets<'a> {
                             socket.0.write_message(Message::Pong(vec![])).unwrap();
                         }
                         Message::Pong(_) => {
-                            //ping_counter = 0;
+                            ping_counter = 0;
                         }
                         Message::Binary(_) => (),
                         Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
                     },
                     Err(e) => {
                         // Таймаут истек; вы можете обработать эту ситуацию, например, закрыть соединение
-                        // и повторно подключиться
+                        // отправляем 3 пинга если нет ответа - ошибка
                         socket.0.write_message(Message::Ping(vec![])).unwrap();
                         ping_counter += 1;
-                        println!("ping_counter: {ping_counter}");
 
                         if ping_counter >= 3{
                             bail!("Disconnected loop is dead");
