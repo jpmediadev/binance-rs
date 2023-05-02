@@ -120,12 +120,10 @@ mod tests {
                     assert_eq!(step_size, "0.01000000");
                 }
                 Filters::MinNotional {
-                    notional,
                     min_notional,
                     apply_to_market,
                     avg_price_mins,
                 } => {
-                    assert!(notional.is_none());
                     assert_eq!(min_notional.unwrap(), "0.00010000");
                     assert_eq!(apply_to_market.unwrap(), true);
                     assert!(approx_eq!(f64, avg_price_mins.unwrap(), 5.0, ulps = 2));
