@@ -6,9 +6,14 @@ use url::Url;
 use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::net::TcpStream;
-use tungstenite::{connect, Message};
+
+use std::time::Duration;
+
+use native_tls::{TlsConnector, TlsStream};
+use tungstenite::client;
+
+use tungstenite::Message;
 use tungstenite::protocol::WebSocket;
-use tungstenite::stream::MaybeTlsStream;
 use tungstenite::handshake::client::Response;
 #[allow(clippy::all)]
 enum FuturesWebsocketAPI {
@@ -64,11 +69,11 @@ pub enum FuturesWebsocketEvent {
     Liquidation(LiquidationEvent),
     DepthOrderBook(DepthOrderBookEvent),
     BookTicker(BookTickerEvent),
-    UserDataStreamExpiredEvent(UserDataStreamExpiredEvent)
+    UserDataStreamExpiredEvent(UserDataStreamExpiredEvent),
 }
 
 pub struct FuturesWebSockets<'a> {
-    pub socket: Option<(WebSocket<MaybeTlsStream<TcpStream>>, Response)>,
+    pub socket: Option<(WebSocket<TlsStream<TcpStream>>, Response)>,
     handler: Box<dyn FnMut(FuturesWebsocketEvent) -> Result<()> + 'a>,
 }
 
@@ -93,7 +98,7 @@ enum FuturesEvents {
     LiquidationEvent(LiquidationEvent),
     OrderBook(OrderBook),
     DepthOrderBookEvent(DepthOrderBookEvent),
-    UserDataStreamExpiredEvent(UserDataStreamExpiredEvent)
+    UserDataStreamExpiredEvent(UserDataStreamExpiredEvent),
 }
 
 impl<'a> FuturesWebSockets<'a> {
@@ -127,13 +132,15 @@ impl<'a> FuturesWebSockets<'a> {
 
     fn connect_wss(&mut self, wss: String) -> Result<()> {
         let url = Url::parse(&wss)?;
-        match connect(url) {
-            Ok(answer) => {
-                self.socket = Some(answer);
-                Ok(())
-            }
-            Err(e) => bail!(format!("Error during handshake {}", e)),
-        }
+        let host = url.host_str().unwrap();
+        let port = url.port().unwrap_or(443);
+        let connector = TlsConnector::new().unwrap();
+        let tcp_stream = TcpStream::connect((host, port)).unwrap();
+        tcp_stream.set_read_timeout(Some(Duration::from_secs(10)))?; // Установите желаемый таймаут
+        let tls_stream = connector.connect(host, tcp_stream).unwrap();
+        let (socket, response) = client(url, tls_stream).unwrap();
+        self.socket = Some((socket, response));
+        Ok(())
     }
 
     pub fn disconnect(&mut self) -> Result<()> {
@@ -176,14 +183,16 @@ impl<'a> FuturesWebSockets<'a> {
                 FuturesEvents::OrderBook(v) => FuturesWebsocketEvent::OrderBook(v),
                 FuturesEvents::DepthOrderBookEvent(v) => FuturesWebsocketEvent::DepthOrderBook(v),
                 FuturesEvents::AggrTradesEvent(v) => FuturesWebsocketEvent::AggrTrades(v),
-                FuturesEvents::UserDataStreamExpiredEvent(v) => FuturesWebsocketEvent::UserDataStreamExpiredEvent(v)
+                FuturesEvents::UserDataStreamExpiredEvent(v) => {
+                    FuturesWebsocketEvent::UserDataStreamExpiredEvent(v)
+                }
             };
             (self.handler)(action)?;
         }
         Ok(())
     }
 
-    pub fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
+    pub fn event_loop0(&mut self, running: &AtomicBool) -> Result<()> {
         while running.load(Ordering::Relaxed) {
             if let Some(ref mut socket) = self.socket {
                 let message = socket.0.read_message()?;
@@ -197,10 +206,44 @@ impl<'a> FuturesWebSockets<'a> {
                         socket.0.write_message(Message::Pong(vec![])).unwrap();
                     }
                     Message::Pong(_) | Message::Binary(_) => (),
-                    Message::Close(e) => bail!(format!("Disconnected {:?}", e))
+                    Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
                 }
             }
         }
         bail!("running loop closed");
     }
+
+    pub fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
+    while running.load(Ordering::Relaxed) {
+        if let Some(ref mut socket) = self.socket {
+            let message = socket.0.read_message();
+            match message {
+                Ok(message) => match message {
+                    Message::Text(msg) => {
+                        if let Err(e) = self.handle_msg(&msg) {
+                            bail!(format!("Error on handling stream message: {}", e));
+                        }
+                    }
+                    Message::Ping(_) => {
+                        socket.0.write_message(Message::Pong(vec![])).unwrap();
+                    }
+                    Message::Pong(_) | Message::Binary(_) => (),
+                    Message::Close(e) => bail!(format!("Disconnected {:?}", e))
+                },
+                Err(e) => {
+                    // Таймаут истек; вы можете обработать эту ситуацию, например, закрыть соединение
+                    // и повторно подключиться
+                    bail!(format!("WebSocket read timeout: {}", e));
+                }
+            }
+        }
+    }
+    bail!("running loop closed");
+}
+
+
+
+
+
+
 }
