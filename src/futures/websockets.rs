@@ -192,31 +192,12 @@ impl<'a> FuturesWebSockets<'a> {
         Ok(())
     }
 
-    pub fn event_loop0(&mut self, running: &AtomicBool) -> Result<()> {
-        while running.load(Ordering::Relaxed) {
-            if let Some(ref mut socket) = self.socket {
-                let message = socket.0.read_message()?;
-                match message {
-                    Message::Text(msg) => {
-                        if let Err(e) = self.handle_msg(&msg) {
-                            bail!(format!("Error on handling stream message: {}", e));
-                        }
-                    }
-                    Message::Ping(_) => {
-                        socket.0.write_message(Message::Pong(vec![])).unwrap();
-                    }
-                    Message::Pong(_) | Message::Binary(_) => (),
-                    Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
-                }
-            }
-        }
-        bail!("running loop closed");
-    }
 
-    pub fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
+
+    pub fn event_loop(&mut self, should_stop: &AtomicBool) -> Result<()> {
         let mut ping_counter = 0;
 
-        while running.load(Ordering::Relaxed) {
+        while !should_stop.load(Ordering::Relaxed) {
             if let Some(ref mut socket) = self.socket {
                 let message = socket.0.read_message();
                 match message {
