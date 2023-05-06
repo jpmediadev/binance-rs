@@ -167,7 +167,7 @@ pub struct Order {
     pub status: String,
     pub time_in_force: String,
     #[serde(rename = "type")]
-    pub type_name: String,
+    pub order_type: String,
     pub side: String,
     #[serde(with = "string_or_float")]
     pub stop_price: f64,
