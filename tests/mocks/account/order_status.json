@@ -16,5 +16,7 @@
     "time": 1499827319559,
     "updateTime": 1499827319559,
     "isWorking": true,
-    "origQuoteOrderQty": "0.000000"
+    "origQuoteOrderQty": "0.000000",
+    "workingTime": 1499827319559,
+    "selfTradePreventionMode": "NONE"
 }

@@ -158,9 +158,12 @@ pub struct Order {
     pub client_order_id: String,
     #[serde(with = "string_or_float")]
     pub price: f64,
-    pub orig_qty: String,
-    pub executed_qty: String,
-    pub cummulative_quote_qty: String,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cummulative_quote_qty: f64,
     pub status: String,
     pub time_in_force: String,
     #[serde(rename = "type")]
@@ -168,11 +171,15 @@ pub struct Order {
     pub side: String,
     #[serde(with = "string_or_float")]
     pub stop_price: f64,
-    pub iceberg_qty: String,
+    #[serde(with = "string_or_float")]
+    pub iceberg_qty: f64,
     pub time: u64,
     pub update_time: u64,
     pub is_working: bool,
-    pub orig_quote_order_qty: String,
+    pub working_time: u64,
+    #[serde(with = "string_or_float")]
+    pub orig_quote_order_qty: f64,
+    pub self_trade_prevention_mode: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

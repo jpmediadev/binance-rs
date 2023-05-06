@@ -100,19 +100,19 @@ mod tests {
         assert_eq!(open_order.order_list_id, -1);
         assert_eq!(open_order.client_order_id, "myOrder1");
         assert!(approx_eq!(f64, open_order.price, 0.1, ulps = 2));
-        assert_eq!(open_order.orig_qty, "1.0");
-        assert_eq!(open_order.executed_qty, "0.0");
-        assert_eq!(open_order.cummulative_quote_qty, "0.0");
+        assert_eq!(open_order.orig_qty, 1.0);
+        assert_eq!(open_order.executed_qty, 0.0);
+        assert_eq!(open_order.cummulative_quote_qty, 0.0);
         assert_eq!(open_order.status, "NEW");
         assert_eq!(open_order.time_in_force, "GTC"); //Migrate to TimeInForce enum
         assert_eq!(open_order.type_name, "LIMIT");
         assert_eq!(open_order.side, "BUY");
         assert!(approx_eq!(f64, open_order.stop_price, 0.0, ulps = 2));
-        assert_eq!(open_order.iceberg_qty, "0.0");
+        assert_eq!(open_order.iceberg_qty, 0.0);
         assert_eq!(open_order.time, 1499827319559);
         assert_eq!(open_order.update_time, 1499827319559);
         assert_eq!(open_order.is_working, true);
-        assert_eq!(open_order.orig_quote_order_qty, "0.000000");
+        assert_eq!(open_order.orig_quote_order_qty, 0.000000);
     }
 
     #[test]
@@ -140,19 +140,19 @@ mod tests {
         assert_eq!(open_order.order_list_id, -1);
         assert_eq!(open_order.client_order_id, "myOrder1");
         assert!(approx_eq!(f64, open_order.price, 0.1, ulps = 2));
-        assert_eq!(open_order.orig_qty, "1.0");
-        assert_eq!(open_order.executed_qty, "0.0");
-        assert_eq!(open_order.cummulative_quote_qty, "0.0");
+        assert_eq!(open_order.orig_qty, 1.0);
+        assert_eq!(open_order.executed_qty, 0.0);
+        assert_eq!(open_order.cummulative_quote_qty, 0.0);
         assert_eq!(open_order.status, "NEW");
         assert_eq!(open_order.time_in_force, "GTC"); //Migrate to TimeInForce enum
         assert_eq!(open_order.type_name, "LIMIT");
         assert_eq!(open_order.side, "BUY");
         assert!(approx_eq!(f64, open_order.stop_price, 0.0, ulps = 2));
-        assert_eq!(open_order.iceberg_qty, "0.0");
+        assert_eq!(open_order.iceberg_qty, 0.0);
         assert_eq!(open_order.time, 1499827319559);
         assert_eq!(open_order.update_time, 1499827319559);
         assert_eq!(open_order.is_working, true);
-        assert_eq!(open_order.orig_quote_order_qty, "0.000000");
+        assert_eq!(open_order.orig_quote_order_qty, 0.000000);
     }
 
     #[test]
@@ -225,19 +225,19 @@ mod tests {
         assert_eq!(order_status.order_list_id, -1);
         assert_eq!(order_status.client_order_id, "myOrder1");
         assert!(approx_eq!(f64, order_status.price, 0.1, ulps = 2));
-        assert_eq!(order_status.orig_qty, "1.0");
-        assert_eq!(order_status.executed_qty, "0.0");
-        assert_eq!(order_status.cummulative_quote_qty, "0.0");
+        assert_eq!(order_status.orig_qty, 1.0);
+        assert_eq!(order_status.executed_qty, 0.0);
+        assert_eq!(order_status.cummulative_quote_qty, 0.0);
         assert_eq!(order_status.status, "NEW");
         assert_eq!(order_status.time_in_force, "GTC"); //Migrate to TimeInForce enum
         assert_eq!(order_status.type_name, "LIMIT");
         assert_eq!(order_status.side, "BUY");
         assert!(approx_eq!(f64, order_status.stop_price, 0.0, ulps = 2));
-        assert_eq!(order_status.iceberg_qty, "0.0");
+        assert_eq!(order_status.iceberg_qty, 0.0);
         assert_eq!(order_status.time, 1499827319559);
         assert_eq!(order_status.update_time, 1499827319559);
         assert_eq!(order_status.is_working, true);
-        assert_eq!(order_status.orig_quote_order_qty, "0.000000");
+        assert_eq!(order_status.orig_quote_order_qty, 0.000000);
     }
 
     #[test]
