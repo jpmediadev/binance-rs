@@ -131,6 +131,22 @@ impl Account {
             .get_signed(API::Spot(Spot::OpenOrders), Some(request))
     }
 
+
+    // Current open orders for ONE symbol
+    pub fn get_all_orders<S>(&self, symbol: S, limit: usize) -> Result<Vec<Order>>
+    where
+        S: Into<String>,
+    {
+        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+        parameters.insert("symbol".into(), symbol.into());
+        parameters.insert("limit".into(), limit.into());
+
+        let request = build_signed_request(parameters, self.recv_window)?;
+        self.client
+            .get_signed(API::Spot(Spot::AllOrders), Some(request))
+    }
+
+
     // Cancel all open orders for a single symbol
     pub fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<Vec<OrderCanceled>>
     where
