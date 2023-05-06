@@ -487,7 +487,7 @@ impl FuturesAccount {
     {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
         parameters.insert("symbol".into(), symbol.into());
-        parameters.insert("limit".into(), limit.into());
+        parameters.insert("limit".into(), limit.to_string());
         let request = build_signed_request(parameters, self.recv_window)?;
         self.client
             .get_signed(API::Futures(Futures::AllOrders), Some(request))
