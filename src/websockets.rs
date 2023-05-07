@@ -8,9 +8,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::net::TcpStream;
 use std::time::Duration;
 use native_tls::{TlsConnector, TlsStream};
-use tungstenite::{client, connect, Message};
+use tungstenite::{client, Message};
 use tungstenite::protocol::WebSocket;
-use tungstenite::stream::MaybeTlsStream;
 use tungstenite::handshake::client::Response;
 
 #[allow(clippy::all)]
