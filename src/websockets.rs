@@ -6,7 +6,9 @@ use serde::{Deserialize, Serialize};
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::net::TcpStream;
-use tungstenite::{connect, Message};
+use std::time::Duration;
+use native_tls::{TlsConnector, TlsStream};
+use tungstenite::{client, connect, Message};
 use tungstenite::protocol::WebSocket;
 use tungstenite::stream::MaybeTlsStream;
 use tungstenite::handshake::client::Response;
@@ -48,7 +50,7 @@ pub enum WebsocketEvent {
 }
 
 pub struct WebSockets<'a> {
-    pub socket: Option<(WebSocket<MaybeTlsStream<TcpStream>>, Response)>,
+    pub socket: Option<(WebSocket<TlsStream<TcpStream>>, Response)>,
     handler: Box<dyn FnMut(WebsocketEvent) -> Result<()> + 'a>,
 }
 
@@ -93,13 +95,15 @@ impl<'a> WebSockets<'a> {
 
     fn connect_wss(&mut self, wss: String) -> Result<()> {
         let url = Url::parse(&wss)?;
-        match connect(url) {
-            Ok(answer) => {
-                self.socket = Some(answer);
-                Ok(())
-            }
-            Err(e) => bail!(format!("Error during handshake {}", e)),
-        }
+        let host = url.host_str().unwrap();
+        let port = url.port().unwrap_or(443);
+        let connector = TlsConnector::new().unwrap();
+        let tcp_stream = TcpStream::connect((host, port)).unwrap();
+        tcp_stream.set_read_timeout(Some(Duration::from_secs(10)))?; // Установите желаемый таймаут
+        let tls_stream = connector.connect(host, tcp_stream).unwrap();
+        let (socket, response) = client(url, tls_stream).unwrap();
+        self.socket = Some((socket, response));
+        Ok(())
     }
 
     pub fn disconnect(&mut self) -> Result<()> {
