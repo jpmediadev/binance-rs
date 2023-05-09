@@ -154,7 +154,7 @@ pub struct Balance {
 pub struct Order {
     pub symbol: String,
     pub order_id: u64,
-    pub order_list_id: i64,
+    pub order_list_id: Option<i64>,
     pub client_order_id: String,
     #[serde(with = "string_or_float")]
     pub price: f64,

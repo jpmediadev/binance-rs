@@ -97,7 +97,7 @@ mod tests {
 
         assert_eq!(open_order.symbol, "LTCBTC");
         assert_eq!(open_order.order_id, 1);
-        assert_eq!(open_order.order_list_id, -1);
+        assert_eq!(open_order.order_list_id.unwrap(), -1);
         assert_eq!(open_order.client_order_id, "myOrder1");
         assert!(approx_eq!(f64, open_order.price, 0.1, ulps = 2));
         assert_eq!(open_order.orig_qty, 1.0);
@@ -137,7 +137,7 @@ mod tests {
 
         assert_eq!(open_order.symbol, "LTCBTC");
         assert_eq!(open_order.order_id, 1);
-        assert_eq!(open_order.order_list_id, -1);
+        assert_eq!(open_order.order_list_id.unwrap(), -1);
         assert_eq!(open_order.client_order_id, "myOrder1");
         assert!(approx_eq!(f64, open_order.price, 0.1, ulps = 2));
         assert_eq!(open_order.orig_qty, 1.0);
@@ -222,7 +222,7 @@ mod tests {
 
         assert_eq!(order_status.symbol, "LTCBTC");
         assert_eq!(order_status.order_id, 1);
-        assert_eq!(order_status.order_list_id, -1);
+        assert_eq!(order_status.order_list_id.unwrap(), -1);
         assert_eq!(order_status.client_order_id, "myOrder1");
         assert!(approx_eq!(f64, order_status.price, 0.1, ulps = 2));
         assert_eq!(order_status.orig_qty, 1.0);
