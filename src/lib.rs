@@ -26,3 +26,4 @@ pub mod userstream;
 pub mod websockets;
 
 pub mod futures;
+pub mod margin;

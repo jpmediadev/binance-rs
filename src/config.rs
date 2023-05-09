@@ -6,6 +6,9 @@ pub struct Config {
     pub futures_rest_api_endpoint: String,
     pub futures_ws_endpoint: String,
 
+    pub margin: bool,
+    pub isolated: bool,
+
     pub recv_window: u64,
 }
 
@@ -18,6 +21,8 @@ impl Config {
             futures_rest_api_endpoint: "https://fapi.binance.com".into(),
             futures_ws_endpoint: "wss://fstream.binance.com/ws".into(),
 
+            margin: false,
+            isolated: false,
             recv_window: 5000,
         }
     }
@@ -55,4 +60,16 @@ impl Config {
         self.recv_window = recv_window;
         self
     }
+
+    pub fn allow_margin(mut self) -> Self{
+        self.margin = true;
+        self
+    }
+
+    pub fn allow_isolated(mut self) -> Self{
+        self.margin = true;
+        self.isolated = true;
+        self
+    }
+
 }

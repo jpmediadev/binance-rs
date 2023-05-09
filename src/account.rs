@@ -6,6 +6,10 @@ use std::collections::BTreeMap;
 use crate::api::API;
 use crate::api::Spot;
 
+
+
+
+
 #[derive(Clone)]
 pub struct Account {
     pub client: Client,
