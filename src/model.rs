@@ -187,8 +187,6 @@ pub struct Order {
 pub struct OrderCanceled {
     pub symbol: String,
     pub orig_client_order_id: Option<String>,
-    #[serde(with = "string_or_float")]
-    pub order_id: Option<u64>,
     pub client_order_id: Option<String>,
 }
 
