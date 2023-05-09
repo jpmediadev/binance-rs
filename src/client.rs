@@ -160,6 +160,7 @@ impl Client {
     }
 
     fn handler<T: DeserializeOwned>(&self, response: Response) -> Result<T> {
+        println!("{response:#?}");
         match response.status() {
             StatusCode::OK => Ok(response.json::<T>()?),
             StatusCode::INTERNAL_SERVER_ERROR => {
