@@ -61,14 +61,13 @@ impl Config {
         self
     }
 
-    pub fn allow_margin(mut self) -> Self{
-        self.margin = true;
+    pub fn set_margin(mut self, margin: bool) -> Self{
+        self.margin = margin;
         self
     }
 
-    pub fn allow_isolated(mut self) -> Self{
-        self.margin = true;
-        self.isolated = true;
+    pub fn set_isolated(mut self, isolated: bool) -> Self{
+        self.isolated = isolated;
         self
     }
 
