@@ -178,7 +178,7 @@ pub struct Order {
     pub is_working: bool,
     //#[serde(with = "string_or_float")]
     //pub orig_quote_order_qty: f64,
-    pub self_trade_prevention_mode: String,
+    pub self_trade_prevention_mode: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
