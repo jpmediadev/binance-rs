@@ -5,6 +5,7 @@ use crate::errors::*;
 use std::collections::BTreeMap;
 use crate::account::{OrderSide, OrderType, TimeInForce};
 use crate::api::{API, Margin};
+use crate::margin::SideEffectType;
 
 #[derive(Clone)]
 pub struct MarginAccount {
@@ -77,6 +78,7 @@ impl MarginAccount {
     pub fn custom_order<S>(
         &self, symbol: S, qty: f64, price: f64, stop_price: Option<f64>, order_side: OrderSide,
         order_type: OrderType, time_in_force: TimeInForce, new_client_order_id: Option<String>,
+        side_effect: SideEffectType
     ) -> Result<Transaction>
     where
         S: Into<String>,
@@ -84,7 +86,7 @@ impl MarginAccount {
         let mut parameters: BTreeMap<String, String> = BTreeMap::new();
         parameters.insert("symbol".into(), symbol.into());
         parameters.insert("isIsolated".into(), bool_to_string(self.is_isolated));
-
+        parameters.insert("sideEffectType".into(), side_effect.into());
         parameters.insert("side".into(), order_side.into());
         parameters.insert("type".into(), order_type.into());
         parameters.insert("quantity".into(), qty.to_string());
