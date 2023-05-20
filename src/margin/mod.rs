@@ -1,6 +1,6 @@
 pub mod account;
 
-
+#[derive(Clone)]
 pub enum SideEffectType{
     NoSideEffect,
     MarginBuy,
