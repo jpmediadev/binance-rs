@@ -82,7 +82,6 @@ impl Client {
 
     pub fn post<T: DeserializeOwned>(&self, endpoint: API) -> Result<T> {
         let url: String = format!("{}{}", self.host, String::from(endpoint));
-
         let client = &self.inner_client;
         let response = client
             .post(url.as_str())
@@ -93,12 +92,16 @@ impl Client {
     }
 
     pub fn put<T: DeserializeOwned>(&self, endpoint: API, listen_key: &str) -> Result<T> {
-        let url: String = format!("{}{}", self.host, String::from(endpoint));
+        let mut url: String = format!("{}{}", self.host, String::from(endpoint.clone()));
         let data: String = format!("listenKey={}", listen_key);
+
+        if let API::Margin(_) =  &endpoint{
+            url = format!("{url}?{data}");
+        }
 
         let client = &self.inner_client;
         let response = client
-            .put(url.as_str())
+            .put(url)
             .headers(self.build_headers(false)?)
             .body(data)
             .send()?;
@@ -107,8 +110,12 @@ impl Client {
     }
 
     pub fn delete<T: DeserializeOwned>(&self, endpoint: API, listen_key: &str) -> Result<T> {
-        let url: String = format!("{}{}", self.host, String::from(endpoint));
+        let mut url: String = format!("{}{}", self.host, String::from(endpoint.clone()));
         let data: String = format!("listenKey={}", listen_key);
+
+        if let API::Margin(_) =  &endpoint{
+            url = format!("{url}?{data}");
+        }
 
         let client = &self.inner_client;
         let response = client
