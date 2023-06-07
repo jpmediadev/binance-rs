@@ -625,7 +625,7 @@ pub struct TradeEvent {
     pub event_type: String,
 
     #[serde(rename = "E")]
-    pub event_time: u64,
+    pub event_time: i64,
 
     #[serde(rename = "s")]
     pub symbol: String,
@@ -634,10 +634,10 @@ pub struct TradeEvent {
     pub trade_id: u64,
 
     #[serde(rename = "p")]
-    pub price: String,
+    pub price: f64,
 
     #[serde(rename = "q")]
-    pub qty: String,
+    pub qty: f64,
 
     #[serde(rename = "b")]
     pub buyer_order_id: Option<u64>,
@@ -763,16 +763,16 @@ pub struct BookTickerEvent {
     pub symbol: String,
 
     #[serde(rename = "b")]
-    pub best_bid: String,
+    pub best_bid: f64,
 
     #[serde(rename = "B")]
-    pub best_bid_qty: String,
+    pub best_bid_qty: f64,
 
     #[serde(rename = "a")]
-    pub best_ask: String,
+    pub best_ask: f64,
 
     #[serde(rename = "A")]
-    pub best_ask_qty: String,
+    pub best_ask_qty: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
