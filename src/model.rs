@@ -633,10 +633,10 @@ pub struct TradeEvent {
     #[serde(rename = "t")]
     pub trade_id: u64,
 
-    #[serde(rename = "p")]
+    #[serde(rename = "p", with = "string_or_float")]
     pub price: f64,
 
-    #[serde(rename = "q")]
+    #[serde(rename = "q", with = "string_or_float")]
     pub qty: f64,
 
     #[serde(rename = "b")]
@@ -762,16 +762,16 @@ pub struct BookTickerEvent {
     #[serde(rename = "s")]
     pub symbol: String,
 
-    #[serde(rename = "b")]
+    #[serde(rename = "b", with = "string_or_float")]
     pub best_bid: f64,
 
-    #[serde(rename = "B")]
+    #[serde(rename = "B", with = "string_or_float")]
     pub best_bid_qty: f64,
 
-    #[serde(rename = "a")]
+    #[serde(rename = "a", with = "string_or_float")]
     pub best_ask: f64,
 
-    #[serde(rename = "A")]
+    #[serde(rename = "A", with = "string_or_float")]
     pub best_ask_qty: f64,
 }
 
