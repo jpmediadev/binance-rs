@@ -1,5 +1,7 @@
 use binance::futures::websockets::*;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::thread::sleep;
+use std::time::Duration;
 
 fn main() {
     market_websocket();
@@ -9,7 +11,7 @@ fn market_websocket() {
     // Example to show the future market websockets. It will print one event for each
     // endpoint and continue to the next.
 
-    let keep_running = AtomicBool::new(true);
+    let should_stop = AtomicBool::new(true);
     let stream_examples_usd_m = vec![
         // taken from https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
         String::from("btcusdt@aggTrade"),  // <symbol>@aggTrade
@@ -65,7 +67,7 @@ fn market_websocket() {
         // in case an event comes in that doesn't properly serialize to
         // a FuturesWebsocketEvent, the web socket loop will keep running
         println!("{:?}\n", event);
-        keep_running.swap(false, Ordering::Relaxed);
+        should_stop.swap(true, Ordering::Relaxed);
 
         Ok(())
     };
@@ -73,26 +75,29 @@ fn market_websocket() {
     // USD-M futures examples
     for stream_example in stream_examples_usd_m {
         println!("Starting with USD_M {:?}", stream_example);
-        keep_running.swap(true, Ordering::Relaxed);
+        should_stop.swap(false, Ordering::Relaxed);
 
         let mut web_socket: FuturesWebSockets<'_> = FuturesWebSockets::new(callback_fn);
         web_socket
             .connect(FuturesMarket::USDM, &stream_example)
             .unwrap();
-        web_socket.event_loop(&keep_running).unwrap();
+        web_socket.event_loop(&should_stop);
+        sleep(Duration::from_secs(2));
         web_socket.disconnect().unwrap();
     }
 
     // COIN-M futures examples
     for stream_example in stream_examples_coin_m {
         println!("Starting with COIN_M {:?}", stream_example);
-        keep_running.swap(true, Ordering::Relaxed);
+        should_stop.swap(false, Ordering::Relaxed);
 
         let mut web_socket: FuturesWebSockets<'_> = FuturesWebSockets::new(callback_fn);
         web_socket
             .connect(FuturesMarket::COINM, &stream_example)
             .unwrap();
-        web_socket.event_loop(&keep_running).unwrap();
+        web_socket.event_loop(&should_stop);
+        sleep(Duration::from_secs(2));
+
         web_socket.disconnect().unwrap();
     }
 }

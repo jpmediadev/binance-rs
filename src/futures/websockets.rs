@@ -163,6 +163,7 @@ impl<'a> FuturesWebSockets<'a> {
             return Ok(());
         }
 
+
         if let Ok(events) = serde_json::from_value::<FuturesEvents>(value) {
             let action = match events {
                 FuturesEvents::Vec(v) => FuturesWebsocketEvent::DayTickerAll(v),

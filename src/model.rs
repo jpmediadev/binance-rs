@@ -640,10 +640,10 @@ pub struct TradeEvent {
     pub qty: String,
 
     #[serde(rename = "b")]
-    pub buyer_order_id: u64,
+    pub buyer_order_id: Option<u64>,
 
     #[serde(rename = "a")]
-    pub seller_order_id: u64,
+    pub seller_order_id: Option<u64>,
 
     #[serde(rename = "T")]
     pub trade_order_time: u64,
@@ -652,7 +652,7 @@ pub struct TradeEvent {
     pub is_buyer_maker: bool,
 
     #[serde(skip, rename = "M")]
-    pub m_ignore: bool,
+    pub m_ignore: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
