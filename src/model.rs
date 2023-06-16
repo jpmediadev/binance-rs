@@ -187,6 +187,16 @@ pub struct OrderCanceled {
     pub symbol: String,
     pub orig_client_order_id: Option<String>,
     pub client_order_id: Option<String>,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    pub status: String,
+    #[serde(rename = "type")]
+    pub type_name: String,
+    pub side: String
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
