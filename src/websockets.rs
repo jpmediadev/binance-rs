@@ -166,14 +166,16 @@ impl<'a> WebSockets<'a> {
                         Message::Binary(_) => (),
                         Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
                     },
-                    Err(_) => {
+                    Err(error) => {
                         // Таймаут истек; вы можете обработать эту ситуацию, например, закрыть соединение
                         // отправляем 3 пинга если нет ответа - ошибка
-                        socket.0.write_message(Message::Ping(vec![])).unwrap();
+                        if let Err(err) = socket.0.write_message(Message::Ping(vec![])){
+                             bail!(format!("Disconnected loop is dead {err:?} {error:?}"));
+                        };
                         ping_counter += 1;
 
                         if ping_counter >= 3{
-                            bail!("Disconnected loop is dead");
+                            bail!(format!("Disconnected loop is dead {error}"));
                         }
                     }
                 }
