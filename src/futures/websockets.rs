@@ -134,11 +134,11 @@ impl<'a> FuturesWebSockets<'a> {
         let url = Url::parse(&wss)?;
         let host = url.host_str().unwrap();
         let port = url.port().unwrap_or(443);
-        let connector = TlsConnector::new().unwrap();
-        let tcp_stream = TcpStream::connect((host, port)).unwrap();
+        let connector = TlsConnector::new()?;
+        let tcp_stream = TcpStream::connect((host, port))?;
         tcp_stream.set_read_timeout(Some(Duration::from_secs(10)))?; // Установите желаемый таймаут
-        let tls_stream = connector.connect(host, tcp_stream).unwrap();
-        let (socket, response) = client(url, tls_stream).unwrap();
+        let tls_stream = connector.connect(host, tcp_stream)?;
+        let (socket, response) = client(url, tls_stream)?;
         self.socket = Some((socket, response));
         Ok(())
     }
