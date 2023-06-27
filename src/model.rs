@@ -231,7 +231,7 @@ pub struct CancelReplace {
     pub cancel_result: String,
     pub new_order_result: String,
     pub cancel_response: CancelOrderResponse,
-    pub new_order_response: NewOrderResponse,
+    pub new_order_response: Option<NewOrderResponse>,
 }
 
 #[derive(Debug, Deserialize)]
