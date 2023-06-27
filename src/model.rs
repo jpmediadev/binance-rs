@@ -235,14 +235,14 @@ pub struct CancelReplace {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", untagged)]
 pub enum CancelOrderResponse {
     Success(OrderCanceled),
     Failure(BinanceContentError),
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", untagged)]
 pub enum NewOrderResponse {
     Success(Transaction),
     Failure(BinanceContentError),
