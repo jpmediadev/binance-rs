@@ -1,10 +1,9 @@
-use std::collections::HashMap;
+
 use std::net::TcpStream;
 use serde::Deserialize;
 use crate::errors;
 use tungstenite::ClientHandshake;
 use native_tls::TlsStream;
-use serde_json::Value;
 use crate::model::CancelReplace;
 
 
@@ -79,5 +78,14 @@ impl From<native_tls::HandshakeError<TcpStream>> for errors::Error {
 impl From<tungstenite::HandshakeError<tungstenite::ClientHandshake<native_tls::TlsStream<std::net::TcpStream>>>> for errors::Error {
     fn from(err: tungstenite::HandshakeError<tungstenite::ClientHandshake<native_tls::TlsStream<std::net::TcpStream>>>) -> errors::Error {
         errors::Error::from(errors::ErrorKind::WebSocketHandshakeError(err))
+    }
+}
+
+impl Error {
+    pub fn cancel_replace(&self) -> Option<&CancelReplace> {
+        match &self.0 {
+            ErrorKind::CancelReplaceError(cancel_replace) => Some(cancel_replace),
+            _ => None,
+        }
     }
 }
