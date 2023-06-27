@@ -7,6 +7,14 @@ use native_tls::TlsStream;
 use serde_json::Value;
 use crate::model::CancelReplace;
 
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+pub enum BinanceContent {
+    CancelReplace(CancelReplace),
+    Error(BinanceContentError)
+}
+
 #[derive(Debug, Deserialize)]
 pub struct BinanceContentError {
     pub code: i16,
@@ -17,6 +25,9 @@ pub struct BinanceContentError {
 
 error_chain! {
     errors {
+
+        CancelReplaceError(data: CancelReplace)
+
         BinanceError(response: BinanceContentError)
 
         KlineValueMissingError(index: usize, name: &'static str) {

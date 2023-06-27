@@ -179,14 +179,28 @@ impl Client {
                 bail!("Unauthorized");
             }
             StatusCode::BAD_REQUEST => {
-                let error: BinanceContentError = response.json()?;
+                let error: BinanceContent = response.json()?;
 
-                Err(ErrorKind::BinanceError(error).into())
+                match error {
+                    BinanceContent::Error(bin_error) => {
+                        Err(ErrorKind::BinanceError(bin_error).into())
+                    }
+                    BinanceContent::CancelReplace(cancel_replace_data) => {
+                        Err(ErrorKind::CancelReplaceError(cancel_replace_data).into())
+                    }
+                }
             }
             _ => {
-                let error: BinanceContentError = response.json()?;
+                let error: BinanceContent = response.json()?;
 
-                Err(ErrorKind::BinanceError(error).into())
+                match error {
+                    BinanceContent::Error(bin_error) => {
+                        Err(ErrorKind::BinanceError(bin_error).into())
+                    }
+                    BinanceContent::CancelReplace(cancel_replace_data) => {
+                        Err(ErrorKind::CancelReplaceError(cancel_replace_data).into())
+                    }
+                }
 
                 //bail!(format!("Received response: {:?}", s));
             }
