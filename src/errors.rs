@@ -15,8 +15,7 @@ pub enum BinanceContent {
         code: i16,
         msg: String,
         data: CancelReplace
-    },
-    Error(BinanceContentError)
+    }
 }
 
 #[derive(Debug, Deserialize)]
