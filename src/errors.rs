@@ -1,15 +1,18 @@
+use std::collections::HashMap;
 use std::net::TcpStream;
 use serde::Deserialize;
 use crate::errors;
 use tungstenite::ClientHandshake;
 use native_tls::TlsStream;
+use serde_json::Value;
 use crate::model::CancelReplace;
 
 #[derive(Debug, Deserialize)]
 pub struct BinanceContentError {
     pub code: i16,
     pub msg: String,
-    pub data: Option<CancelReplace>,
+    #[serde(flatten)]
+    pub extra: HashMap<String, Value>,
 }
 
 error_chain! {
