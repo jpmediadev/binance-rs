@@ -243,9 +243,11 @@ impl CancelReplace{
     }
 
     pub fn success_submit(&self) -> Option<&Transaction>{
+
         match &self.new_order_response{
-            NewOrderResponse::Success(e) => Some(e),
-            NewOrderResponse::Failure(_) => None
+            Some(NewOrderResponse::Success(e)) => Some(e),
+            Some(NewOrderResponse::Failure(_)) => None,
+            _ => None
         }
     }
 
@@ -258,8 +260,9 @@ impl CancelReplace{
 
     pub fn failed_submit(&self) -> Option<&BinanceContentError>{
         match &self.new_order_response{
-            NewOrderResponse::Success(_) => None,
-            NewOrderResponse::Failure(e) => Some(e)
+            Some(NewOrderResponse::Success(_)) => None,
+            Some(NewOrderResponse::Failure(e)) => Some(e),
+            _ => None
         }
     }
 }
