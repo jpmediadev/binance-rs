@@ -646,7 +646,7 @@ impl Account {
         cancel_order_id: S
     ) -> Result<CancelReplace>
     where
-        S: Into<String>,
+        S: Into<String> + Clone,
 
     {
         let mut params: BTreeMap<String, String> = BTreeMap::new();
