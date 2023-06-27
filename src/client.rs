@@ -185,8 +185,8 @@ impl Client {
                     BinanceContent::Error(bin_error) => {
                         Err(ErrorKind::BinanceError(bin_error).into())
                     }
-                    BinanceContent::CancelReplace(.., cancel_replace_data) => {
-                        Err(ErrorKind::CancelReplaceError(cancel_replace_data).into())
+                    BinanceContent::CancelReplace {  data, ..} => {
+                        Err(ErrorKind::CancelReplaceError(data).into())
                     }
                 }
             }
@@ -197,8 +197,8 @@ impl Client {
                     BinanceContent::Error(bin_error) => {
                         Err(ErrorKind::BinanceError(bin_error).into())
                     }
-                    BinanceContent::CancelReplace(.., cancel_replace_data) => {
-                        Err(ErrorKind::CancelReplaceError(cancel_replace_data).into())
+                    BinanceContent::CancelReplace{data, ..} => {
+                        Err(ErrorKind::CancelReplaceError(data).into())
                     }
                 }
 
