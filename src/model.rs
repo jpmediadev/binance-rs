@@ -205,7 +205,7 @@ pub struct OrderCanceled {
 #[serde(rename_all = "camelCase")]
 pub struct ReplaceOrderResponse {
     pub symbol: String,
-    pub orig_client_order_id: String,
+    pub orig_client_order_id: Option<String>,
     pub order_id: u64,
     pub order_list_id: i64,
     pub client_order_id: String,
