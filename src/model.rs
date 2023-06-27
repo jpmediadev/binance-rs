@@ -199,6 +199,42 @@ pub struct OrderCanceled {
     pub side: String
 }
 
+
+/// Cancel-Replace Order response
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReplaceOrderResponse {
+    pub symbol: String,
+    pub orig_client_order_id: String,
+    pub order_id: u64,
+    pub order_list_id: i64,
+    pub client_order_id: String,
+    pub transact_time: Option<u64>,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cummulative_quote_qty: f64,
+    pub status: String,
+    pub time_in_force: String,
+    #[serde(rename = "type")]
+    pub type_name: String,
+    pub side: String,
+    pub self_trade_prevention_mode: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelReplace {
+    pub cancel_result: String,
+    pub new_order_result: String,
+    pub cancel_response: ReplaceOrderResponse,
+    pub new_order_response: ReplaceOrderResponse,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Transaction {

@@ -48,6 +48,7 @@ pub enum Spot {
     Account,
     MyTrades,
     UserDataStream,
+    CancelReplace
 }
 
 #[derive(Clone)]
@@ -134,6 +135,8 @@ impl From<API> for String {
                 Spot::Account => "/api/v3/account",
                 Spot::MyTrades => "/api/v3/myTrades",
                 Spot::UserDataStream => "/api/v3/userDataStream",
+                Spot::CancelReplace => "/api/v3/order/cancelReplace"
+
             },
             API::Savings(route) => match route {
                 Sapi::AllCoins => "/sapi/v1/capital/config/getall",
