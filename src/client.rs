@@ -182,24 +182,26 @@ impl Client {
                 let error: BinanceContent = response.json()?;
 
                 match error {
+                     BinanceContent::CancelReplace {  data, ..} => {
+                        Err(ErrorKind::CancelReplaceError(data).into())
+                    }
                     BinanceContent::Error(bin_error) => {
                         Err(ErrorKind::BinanceError(bin_error).into())
                     }
-                    BinanceContent::CancelReplace {  data, ..} => {
-                        Err(ErrorKind::CancelReplaceError(data).into())
-                    }
+
                 }
             }
             _ => {
                 let error: BinanceContent = response.json()?;
 
                 match error {
+                      BinanceContent::CancelReplace{data, ..} => {
+                        Err(ErrorKind::CancelReplaceError(data).into())
+                    }
                     BinanceContent::Error(bin_error) => {
                         Err(ErrorKind::BinanceError(bin_error).into())
                     }
-                    BinanceContent::CancelReplace{data, ..} => {
-                        Err(ErrorKind::CancelReplaceError(data).into())
-                    }
+
                 }
 
                 //bail!(format!("Received response: {:?}", s));
