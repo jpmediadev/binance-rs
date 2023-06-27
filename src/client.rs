@@ -183,8 +183,12 @@ impl Client {
 
                 Err(ErrorKind::BinanceError(error).into())
             }
-            s => {
-                bail!(format!("Received response: {:?}", s));
+            _ => {
+                let error: BinanceContentError = response.json()?;
+
+                Err(ErrorKind::BinanceError(error).into())
+
+                //bail!(format!("Received response: {:?}", s));
             }
         }
     }
