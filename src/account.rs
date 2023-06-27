@@ -660,7 +660,7 @@ impl Account {
             params.insert("timeInForce".into(), time_in_force.into());
         }
 
-        params.insert("origClientOrderId".into(), new_client_order_id.clone().into());
+
          params.insert("newClientOrderId".into(), new_client_order_id.into());
         params.insert("cancelOrigClientOrderId".into(), cancel_order_id.into());
         params.insert("cancelReplaceMode".into(), "STOP_ON_FAILURE".to_string());
