@@ -642,8 +642,8 @@ impl Account {
     #[allow(clippy::too_many_arguments)]
     pub fn cancel_replace<S>(
         &self, symbol: S, qty: f64, price: f64,  order_side: OrderSide,
-        order_type: OrderType, time_in_force: TimeInForce, new_client_order_id: String,
-        cancel_order_id: String
+        order_type: OrderType, time_in_force: TimeInForce, new_client_order_id: S,
+        cancel_order_id: S
     ) -> Result<CancelReplace>
     where
         S: Into<String>,
@@ -660,8 +660,8 @@ impl Account {
             params.insert("timeInForce".into(), time_in_force.into());
         }
 
-        params.insert("newClientOrderId".into(), new_client_order_id);
-        params.insert("cancelOrigClientOrderId".into(), cancel_order_id);
+        params.insert("newClientOrderId".into(), new_client_order_id.into());
+        params.insert("cancelOrigClientOrderId".into(), cancel_order_id.into());
         params.insert("cancelReplaceMode".into(), "STOP_ON_FAILURE".to_string());
 
         let request = build_signed_request(params, self.recv_window)?;
