@@ -223,7 +223,6 @@ pub struct ReplaceOrderResponse {
     #[serde(rename = "type")]
     pub type_name: String,
     pub side: String,
-    pub self_trade_prevention_mode: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -231,8 +230,8 @@ pub struct ReplaceOrderResponse {
 pub struct CancelReplace {
     pub cancel_result: String,
     pub new_order_result: String,
-    pub cancel_response: ReplaceOrderResponse,
-    pub new_order_response: ReplaceOrderResponse,
+    pub cancel_response: OrderCanceled,
+    pub new_order_response: Transaction,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
