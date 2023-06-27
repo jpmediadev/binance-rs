@@ -234,6 +234,36 @@ pub struct CancelReplace {
     pub new_order_response: Option<NewOrderResponse>,
 }
 
+impl CancelReplace{
+    pub fn success_cancel(&self) -> Option<&OrderCanceled>{
+        match &self.cancel_response{
+            CancelOrderResponse::Success(e) => Some(e),
+            CancelOrderResponse::Failure(_) => None
+        }
+    }
+
+    pub fn success_submit(&self) -> Option<&Transaction>{
+        match &self.new_order_response{
+            NewOrderResponse::Success(e) => Some(e),
+            NewOrderResponse::Failure(_) => None
+        }
+    }
+
+    pub fn failed_cancel(&self) -> Option<&BinanceContentError>{
+        match &self.cancel_response{
+            CancelOrderResponse::Success(_) => None,
+            CancelOrderResponse::Failure(e) => Some(e)
+        }
+    }
+
+    pub fn failed_submit(&self) -> Option<&BinanceContentError>{
+        match &self.new_order_response{
+            NewOrderResponse::Success(_) => None,
+            NewOrderResponse::Failure(e) => Some(e)
+        }
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", untagged)]
 pub enum CancelOrderResponse {
