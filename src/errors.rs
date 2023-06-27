@@ -11,7 +11,11 @@ use crate::model::CancelReplace;
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum BinanceContent {
-    CancelReplace(CancelReplace),
+    CancelReplace{
+        code: i16,
+        msg: String,
+        data: CancelReplace
+    },
     Error(BinanceContentError)
 }
 
@@ -19,8 +23,7 @@ pub enum BinanceContent {
 pub struct BinanceContentError {
     pub code: i16,
     pub msg: String,
-    #[serde(flatten)]
-    pub extra: HashMap<String, Value>,
+
 }
 
 error_chain! {
