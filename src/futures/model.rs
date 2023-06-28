@@ -241,6 +241,8 @@ pub struct Transaction {
     pub position_side: String,
     pub status: String,
     #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
     pub stop_price: f64,
     pub close_position: bool,
     pub symbol: String,
