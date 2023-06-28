@@ -326,7 +326,7 @@ impl FuturesAccount {
     }
 
     // Modify Order
-    pub fn modify_order<S,F>(&self, symbol: S, side: S, price: S, quantity: S, client_order_id: S, is_close_position: bool) -> Result<Transaction>
+    pub fn modify_order<S,F>(&self, symbol: S, side: S, price: f64, quantity: f64, client_order_id: S, is_close_position: bool) -> Result<Transaction>
      where
         S: Into<String>,
     {
