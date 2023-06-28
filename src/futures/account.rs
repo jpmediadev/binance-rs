@@ -335,6 +335,7 @@ impl FuturesAccount {
         parameters.insert("side".into(), side.into());
         parameters.insert("price".into(), price.to_string());
         parameters.insert("origClientOrderId".into(), client_order_id.into());
+        parameters.insert("type".into(), OrderType::Limit.to_string());
 
         if !is_close_position{
             parameters.insert("quantity".into(), quantity.to_string());
