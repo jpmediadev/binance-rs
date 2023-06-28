@@ -95,6 +95,7 @@ pub enum Futures {
     Account,
     OpenOrders,
     UserDataStream,
+    ModifyOrder
 }
 
 #[derive(Clone)]
@@ -179,6 +180,7 @@ impl From<API> for String {
                 Futures::Account => "/fapi/v2/account",
                 Futures::OpenOrders => "/fapi/v1/openOrders",
                 Futures::UserDataStream => "/fapi/v1/listenKey",
+                Futures::ModifyOrder => "/fapi/v1/order",
             },
             API::Margin(route) => match route{
                 Margin::OpenOrders => "/sapi/v1/margin/openOrders",

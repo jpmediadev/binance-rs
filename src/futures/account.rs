@@ -325,6 +325,27 @@ impl FuturesAccount {
             .post_signed(API::Futures(Futures::Order), request)
     }
 
+    // Modify Order
+    pub fn modify_order<S,F>(&self, symbol: S, side: S, price: S, quantity: S, client_order_id: S, is_close_position: bool) -> Result<Transaction>
+     where
+        S: Into<String>,
+    {
+        let mut parameters = BTreeMap::new();
+        parameters.insert("symbol".into(), symbol.into());
+        parameters.insert("side".into(), side.into());
+        parameters.insert("price".into(), price.into());
+        parameters.insert("origClientOrderId".into(), client_order_id.into());
+
+        if !is_close_position{
+            parameters.insert("quantity".into(), quantity.into());
+        }
+
+        let request = build_signed_request(parameters, self.recv_window)?;
+        self.client
+            .post_signed(API::Futures(Futures::ModifyOrder), request)
+    }
+
+
     // Custom order for for professional traders
     pub fn custom_order(&self, order_request: CustomOrderRequest) -> Result<Transaction> {
         let order: OrderRequest = OrderRequest {
