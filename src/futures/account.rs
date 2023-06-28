@@ -343,7 +343,7 @@ impl FuturesAccount {
 
         let request = build_signed_request(parameters, self.recv_window)?;
         self.client
-            .post_signed(API::Futures(Futures::ModifyOrder), request)
+            .put_signed(API::Futures(Futures::ModifyOrder), request)
     }
 
 
