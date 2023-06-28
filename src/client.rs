@@ -53,6 +53,18 @@ impl Client {
         self.handler(response)
     }
 
+
+    pub fn put_signed<T: DeserializeOwned>(&self, endpoint: API, request: String) -> Result<T> {
+        let url = self.sign_request(endpoint, Some(request));
+        let client = &self.inner_client;
+        let response = client
+            .put(url.as_str())
+            .headers(self.build_headers(true)?)
+            .send()?;
+
+        self.handler(response)
+    }
+
     pub fn delete_signed<T: DeserializeOwned>(
         &self, endpoint: API, request: Option<String>,
     ) -> Result<T> {
