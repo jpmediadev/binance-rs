@@ -662,6 +662,7 @@ impl Account {
         params.insert("newClientOrderId".into(), new_client_order_id.into());
         params.insert("cancelOrigClientOrderId".into(), cancel_order_id.into());
         params.insert("cancelReplaceMode".into(), "STOP_ON_FAILURE".to_string());
+        params.insert("cancelRestrictions".into(), "ONLY_NEW".to_string());
 
         let request = build_signed_request(params, self.recv_window)?;
         self.client.post_signed(API::Spot(Spot::CancelReplace), request)
