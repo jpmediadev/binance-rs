@@ -641,7 +641,7 @@ impl Account {
     /// Cancel - Replace a exist order
     #[allow(clippy::too_many_arguments)]
     pub fn cancel_replace<S>(
-        &self, symbol: S, qty: f64, price: f64,  order_side: OrderSide,
+        &self, symbol: S, qty: Option<f64>, price: f64,  order_side: OrderSide,
         order_type: OrderType, time_in_force: TimeInForce, new_client_order_id: S,
         cancel_order_id: S
     ) -> Result<CancelReplace>
@@ -653,7 +653,10 @@ impl Account {
         params.insert("symbol".into(), symbol.into());
         params.insert("side".into(), order_side.into());
         params.insert("type".into(), order_type.into());
-        params.insert("quantity".into(), qty.to_string());
+
+        if let Some(q) = qty {
+            params.insert("quantity".into(), q.to_string());
+        }
 
         if price != 0.0 {
             params.insert("price".into(), price.to_string());
@@ -662,7 +665,7 @@ impl Account {
         params.insert("newClientOrderId".into(), new_client_order_id.into());
         params.insert("cancelOrigClientOrderId".into(), cancel_order_id.into());
         params.insert("cancelReplaceMode".into(), "STOP_ON_FAILURE".to_string());
-        params.insert("cancelRestrictions".into(), "ONLY_NEW".to_string());
+        // params.insert("cancelRestrictions".into(), "ONLY_NEW".to_string());
 
         let request = build_signed_request(params, self.recv_window)?;
         self.client.post_signed(API::Spot(Spot::CancelReplace), request)
