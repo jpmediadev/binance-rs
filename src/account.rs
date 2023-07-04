@@ -6,6 +6,10 @@ use std::collections::BTreeMap;
 use crate::api::API;
 use crate::api::Spot;
 
+
+
+
+
 #[derive(Clone)]
 pub struct Account {
     pub client: Client,
@@ -130,6 +134,34 @@ impl Account {
         self.client
             .get_signed(API::Spot(Spot::OpenOrders), Some(request))
     }
+
+
+    // Current open orders for ONE symbol
+    pub fn get_all_orders<S>(&self, symbol: S, limit: usize) -> Result<Vec<Order>>
+    where
+        S: Into<String>,
+    {
+        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+        parameters.insert("symbol".into(), symbol.into());
+        parameters.insert("limit".into(), limit.to_string());
+
+        let request = build_signed_request(parameters, self.recv_window)?;
+        self.client
+            .get_signed(API::Spot(Spot::AllOrders), Some(request))
+    }
+
+    pub fn get_order_status<S>(&self, symbol: S, client_order_id: S) -> Result<Order>
+    where
+        S: Into<String>,
+    {
+        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+        parameters.insert("symbol".into(), symbol.into());
+        parameters.insert("origClientOrderId".into(), client_order_id.into());
+        let request = build_signed_request(parameters, self.recv_window)?;
+        self.client
+            .get_signed(API::Spot(Spot::Order), Some(request))
+    }
+
 
     // Cancel all open orders for a single symbol
     pub fn cancel_all_open_orders<S>(&self, symbol: S) -> Result<Vec<OrderCanceled>>
@@ -606,6 +638,36 @@ impl Account {
             .map(|_| ())
     }
 
+    /// Cancel - Replace a exist order
+    #[allow(clippy::too_many_arguments)]
+    pub fn cancel_replace<S>(
+        &self, symbol: S, qty: f64, price: f64,  order_side: OrderSide,
+        order_type: OrderType, time_in_force: TimeInForce, new_client_order_id: S,
+        cancel_order_id: S
+    ) -> Result<CancelReplace>
+    where
+        S: Into<String> + Clone,
+
+    {
+        let mut params: BTreeMap<String, String> = BTreeMap::new();
+        params.insert("symbol".into(), symbol.into());
+        params.insert("side".into(), order_side.into());
+        params.insert("type".into(), order_type.into());
+        params.insert("quantity".into(), qty.to_string());
+
+        if price != 0.0 {
+            params.insert("price".into(), price.to_string());
+            params.insert("timeInForce".into(), time_in_force.into());
+        }
+        params.insert("newClientOrderId".into(), new_client_order_id.into());
+        params.insert("cancelOrigClientOrderId".into(), cancel_order_id.into());
+        params.insert("cancelReplaceMode".into(), "STOP_ON_FAILURE".to_string());
+        params.insert("cancelRestrictions".into(), "ONLY_NEW".to_string());
+
+        let request = build_signed_request(params, self.recv_window)?;
+        self.client.post_signed(API::Spot(Spot::CancelReplace), request)
+    }
+
     /// Place a custom order
     #[allow(clippy::too_many_arguments)]
     pub fn custom_order<S, F>(
@@ -719,7 +781,6 @@ impl Account {
 
     fn build_order(&self, order: OrderRequest) -> BTreeMap<String, String> {
         let mut order_parameters: BTreeMap<String, String> = BTreeMap::new();
-
         order_parameters.insert("symbol".into(), order.symbol);
         order_parameters.insert("side".into(), order.order_side.into());
         order_parameters.insert("type".into(), order.order_type.into());

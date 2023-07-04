@@ -53,6 +53,18 @@ impl Client {
         self.handler(response)
     }
 
+
+    pub fn put_signed<T: DeserializeOwned>(&self, endpoint: API, request: String) -> Result<T> {
+        let url = self.sign_request(endpoint, Some(request));
+        let client = &self.inner_client;
+        let response = client
+            .put(url.as_str())
+            .headers(self.build_headers(true)?)
+            .send()?;
+
+        self.handler(response)
+    }
+
     pub fn delete_signed<T: DeserializeOwned>(
         &self, endpoint: API, request: Option<String>,
     ) -> Result<T> {
@@ -82,7 +94,6 @@ impl Client {
 
     pub fn post<T: DeserializeOwned>(&self, endpoint: API) -> Result<T> {
         let url: String = format!("{}{}", self.host, String::from(endpoint));
-
         let client = &self.inner_client;
         let response = client
             .post(url.as_str())
@@ -93,12 +104,16 @@ impl Client {
     }
 
     pub fn put<T: DeserializeOwned>(&self, endpoint: API, listen_key: &str) -> Result<T> {
-        let url: String = format!("{}{}", self.host, String::from(endpoint));
+        let mut url: String = format!("{}{}", self.host, String::from(endpoint.clone()));
         let data: String = format!("listenKey={}", listen_key);
+
+        if let API::Margin(_) =  &endpoint{
+            url = format!("{url}?{data}");
+        }
 
         let client = &self.inner_client;
         let response = client
-            .put(url.as_str())
+            .put(url)
             .headers(self.build_headers(false)?)
             .body(data)
             .send()?;
@@ -107,8 +122,12 @@ impl Client {
     }
 
     pub fn delete<T: DeserializeOwned>(&self, endpoint: API, listen_key: &str) -> Result<T> {
-        let url: String = format!("{}{}", self.host, String::from(endpoint));
+        let mut url: String = format!("{}{}", self.host, String::from(endpoint.clone()));
         let data: String = format!("listenKey={}", listen_key);
+
+        if let API::Margin(_) =  &endpoint{
+            url = format!("{url}?{data}");
+        }
 
         let client = &self.inner_client;
         let response = client
@@ -172,12 +191,32 @@ impl Client {
                 bail!("Unauthorized");
             }
             StatusCode::BAD_REQUEST => {
-                let error: BinanceContentError = response.json()?;
+                let error: BinanceContent = response.json()?;
 
-                Err(ErrorKind::BinanceError(error).into())
+                match error {
+                     BinanceContent::CancelReplace {  data, ..} => {
+                        Err(ErrorKind::CancelReplaceError(data).into())
+                    }
+                    BinanceContent::Error(bin_error) => {
+                        Err(ErrorKind::BinanceError(bin_error).into())
+                    }
+
+                }
             }
-            s => {
-                bail!(format!("Received response: {:?}", s));
+            _ => {
+                let error: BinanceContent = response.json()?;
+
+                match error {
+                      BinanceContent::CancelReplace{data, ..} => {
+                        Err(ErrorKind::CancelReplaceError(data).into())
+                    }
+                    BinanceContent::Error(bin_error) => {
+                        Err(ErrorKind::BinanceError(bin_error).into())
+                    }
+
+                }
+
+                //bail!(format!("Received response: {:?}", s));
             }
         }
     }

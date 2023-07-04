@@ -154,34 +154,131 @@ pub struct Balance {
 pub struct Order {
     pub symbol: String,
     pub order_id: u64,
-    pub order_list_id: i64,
+    pub order_list_id: Option<i64>,
     pub client_order_id: String,
     #[serde(with = "string_or_float")]
     pub price: f64,
-    pub orig_qty: String,
-    pub executed_qty: String,
-    pub cummulative_quote_qty: String,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cummulative_quote_qty: f64,
     pub status: String,
     pub time_in_force: String,
     #[serde(rename = "type")]
-    pub type_name: String,
+    pub order_type: String,
     pub side: String,
     #[serde(with = "string_or_float")]
     pub stop_price: f64,
-    pub iceberg_qty: String,
+    #[serde(with = "string_or_float")]
+    pub iceberg_qty: f64,
     pub time: u64,
     pub update_time: u64,
     pub is_working: bool,
-    pub orig_quote_order_qty: String,
+    //#[serde(with = "string_or_float")]
+    //pub orig_quote_order_qty: f64,
+    pub self_trade_prevention_mode: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrderCanceled {
     pub symbol: String,
+    pub orig_client_order_id: String,
+    pub client_order_id: String,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    pub status: String,
+    #[serde(rename = "type")]
+    pub type_name: String,
+    pub side: String
+}
+
+
+/// Cancel-Replace Order response
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReplaceOrderResponse {
+    pub symbol: String,
     pub orig_client_order_id: Option<String>,
-    pub order_id: Option<u64>,
-    pub client_order_id: Option<String>,
+    pub order_id: u64,
+    pub order_list_id: i64,
+    pub client_order_id: String,
+    pub transact_time: Option<u64>,
+    #[serde(with = "string_or_float")]
+    pub price: f64,
+    #[serde(with = "string_or_float")]
+    pub orig_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub executed_qty: f64,
+    #[serde(with = "string_or_float")]
+    pub cummulative_quote_qty: f64,
+    pub status: String,
+    pub time_in_force: String,
+    #[serde(rename = "type")]
+    pub type_name: String,
+    pub side: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CancelReplace {
+    pub cancel_result: String,
+    pub new_order_result: String,
+    pub cancel_response: CancelOrderResponse,
+    pub new_order_response: Option<NewOrderResponse>,
+}
+
+impl CancelReplace{
+    pub fn success_cancel(&self) -> Option<&OrderCanceled>{
+        match &self.cancel_response{
+            CancelOrderResponse::Success(e) => Some(e),
+            CancelOrderResponse::Failure(_) => None
+        }
+    }
+
+    pub fn success_submit(&self) -> Option<&Transaction>{
+
+        match &self.new_order_response{
+            Some(NewOrderResponse::Success(e)) => Some(e),
+            Some(NewOrderResponse::Failure(_)) => None,
+            _ => None
+        }
+    }
+
+    pub fn failed_cancel(&self) -> Option<&BinanceContentError>{
+        match &self.cancel_response{
+            CancelOrderResponse::Success(_) => None,
+            CancelOrderResponse::Failure(e) => Some(e)
+        }
+    }
+
+    pub fn failed_submit(&self) -> Option<&BinanceContentError>{
+        match &self.new_order_response{
+            Some(NewOrderResponse::Success(_)) => None,
+            Some(NewOrderResponse::Failure(e)) => Some(e),
+            _ => None
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", untagged)]
+pub enum CancelOrderResponse {
+    Success(OrderCanceled),
+    Failure(BinanceContentError),
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", untagged)]
+pub enum NewOrderResponse {
+    Success(Transaction),
+    Failure(BinanceContentError),
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -620,7 +717,7 @@ pub struct TradeEvent {
     pub event_type: String,
 
     #[serde(rename = "E")]
-    pub event_time: u64,
+    pub event_time: i64,
 
     #[serde(rename = "s")]
     pub symbol: String,
@@ -628,17 +725,17 @@ pub struct TradeEvent {
     #[serde(rename = "t")]
     pub trade_id: u64,
 
-    #[serde(rename = "p")]
-    pub price: String,
+    #[serde(rename = "p", with = "string_or_float")]
+    pub price: f64,
 
-    #[serde(rename = "q")]
-    pub qty: String,
+    #[serde(rename = "q", with = "string_or_float")]
+    pub qty: f64,
 
     #[serde(rename = "b")]
-    pub buyer_order_id: u64,
+    pub buyer_order_id: Option<u64>,
 
     #[serde(rename = "a")]
-    pub seller_order_id: u64,
+    pub seller_order_id: Option<u64>,
 
     #[serde(rename = "T")]
     pub trade_order_time: u64,
@@ -647,7 +744,7 @@ pub struct TradeEvent {
     pub is_buyer_maker: bool,
 
     #[serde(skip, rename = "M")]
-    pub m_ignore: bool,
+    pub m_ignore: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -757,17 +854,17 @@ pub struct BookTickerEvent {
     #[serde(rename = "s")]
     pub symbol: String,
 
-    #[serde(rename = "b")]
-    pub best_bid: String,
+    #[serde(rename = "b", with = "string_or_float")]
+    pub best_bid: f64,
 
-    #[serde(rename = "B")]
-    pub best_bid_qty: String,
+    #[serde(rename = "B", with = "string_or_float")]
+    pub best_bid_qty: f64,
 
-    #[serde(rename = "a")]
-    pub best_ask: String,
+    #[serde(rename = "a", with = "string_or_float")]
+    pub best_ask: f64,
 
-    #[serde(rename = "A")]
-    pub best_ask_qty: String,
+    #[serde(rename = "A", with = "string_or_float")]
+    pub best_ask_qty: f64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

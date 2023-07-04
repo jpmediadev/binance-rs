@@ -325,6 +325,28 @@ impl FuturesAccount {
             .post_signed(API::Futures(Futures::Order), request)
     }
 
+    // Modify Order
+    pub fn modify_order<S>(&self, symbol: S, side: OrderSide, price: f64, quantity: f64, client_order_id: S, is_close_position: bool) -> Result<Transaction>
+     where
+        S: Into<String>,
+    {
+        let mut parameters = BTreeMap::new();
+        parameters.insert("symbol".into(), symbol.into());
+        parameters.insert("side".into(), side.into());
+        parameters.insert("price".into(), price.to_string());
+        parameters.insert("origClientOrderId".into(), client_order_id.into());
+        //parameters.insert("type".into(), OrderType::Limit.into());
+
+        if !is_close_position{
+            parameters.insert("quantity".into(), quantity.to_string());
+        }
+
+        let request = build_signed_request(parameters, self.recv_window)?;
+        self.client
+            .put_signed(API::Futures(Futures::ModifyOrder), request)
+    }
+
+
     // Custom order for for professional traders
     pub fn custom_order(&self, order_request: CustomOrderRequest) -> Result<Transaction> {
         let order: OrderRequest = OrderRequest {
@@ -469,6 +491,7 @@ impl FuturesAccount {
             .map(|_| ())
     }
 
+
     pub fn get_all_open_orders<S>(&self, symbol: S) -> Result<Vec<crate::futures::model::Order>>
     where
         S: Into<String>,
@@ -478,5 +501,29 @@ impl FuturesAccount {
         let request = build_signed_request(parameters, self.recv_window)?;
         self.client
             .get_signed(API::Futures(Futures::OpenOrders), Some(request))
+    }
+
+    pub fn get_all_orders<S>(&self, symbol: S, limit: usize) -> Result<Vec<crate::futures::model::Order>>
+    where
+        S: Into<String>,
+    {
+        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+        parameters.insert("symbol".into(), symbol.into());
+        parameters.insert("limit".into(), limit.to_string());
+        let request = build_signed_request(parameters, self.recv_window)?;
+        self.client
+            .get_signed(API::Futures(Futures::AllOrders), Some(request))
+    }
+
+    pub fn get_order_status<S>(&self, symbol: S, client_order_id: S) -> Result<crate::futures::model::Order>
+    where
+        S: Into<String>,
+    {
+        let mut parameters: BTreeMap<String, String> = BTreeMap::new();
+        parameters.insert("symbol".into(), symbol.into());
+        parameters.insert("origClientOrderId".into(), client_order_id.into());
+        let request = build_signed_request(parameters, self.recv_window)?;
+        self.client
+            .get_signed(API::Futures(Futures::Order), Some(request))
     }
 }

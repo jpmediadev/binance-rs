@@ -44,3 +44,11 @@ fn get_timestamp(start: SystemTime) -> Result<u64> {
     let since_epoch = start.duration_since(UNIX_EPOCH)?;
     Ok(since_epoch.as_secs() * 1000 + u64::from(since_epoch.subsec_nanos()) / 1_000_000)
 }
+
+pub fn bool_to_string(b: bool) -> String {
+    if b {
+        "TRUE".to_string()
+    } else {
+        "FALSE".to_string()
+    }
+}

@@ -134,11 +134,11 @@ impl<'a> FuturesWebSockets<'a> {
         let url = Url::parse(&wss)?;
         let host = url.host_str().unwrap();
         let port = url.port().unwrap_or(443);
-        let connector = TlsConnector::new().unwrap();
-        let tcp_stream = TcpStream::connect((host, port)).unwrap();
+        let connector = TlsConnector::new()?;
+        let tcp_stream = TcpStream::connect((host, port))?;
         tcp_stream.set_read_timeout(Some(Duration::from_secs(10)))?; // Установите желаемый таймаут
-        let tls_stream = connector.connect(host, tcp_stream).unwrap();
-        let (socket, response) = client(url, tls_stream).unwrap();
+        let tls_stream = connector.connect(host, tcp_stream)?;
+        let (socket, response) = client(url, tls_stream)?;
         self.socket = Some((socket, response));
         Ok(())
     }
@@ -162,6 +162,7 @@ impl<'a> FuturesWebSockets<'a> {
             self.handle_msg(&data.to_string())?;
             return Ok(());
         }
+
 
         if let Ok(events) = serde_json::from_value::<FuturesEvents>(value) {
             let action = match events {
@@ -192,31 +193,12 @@ impl<'a> FuturesWebSockets<'a> {
         Ok(())
     }
 
-    pub fn event_loop0(&mut self, running: &AtomicBool) -> Result<()> {
-        while running.load(Ordering::Relaxed) {
-            if let Some(ref mut socket) = self.socket {
-                let message = socket.0.read_message()?;
-                match message {
-                    Message::Text(msg) => {
-                        if let Err(e) = self.handle_msg(&msg) {
-                            bail!(format!("Error on handling stream message: {}", e));
-                        }
-                    }
-                    Message::Ping(_) => {
-                        socket.0.write_message(Message::Pong(vec![])).unwrap();
-                    }
-                    Message::Pong(_) | Message::Binary(_) => (),
-                    Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
-                }
-            }
-        }
-        bail!("running loop closed");
-    }
 
-    pub fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
+
+    pub fn event_loop(&mut self, should_stop: &AtomicBool) -> Result<()> {
         let mut ping_counter = 0;
 
-        while running.load(Ordering::Relaxed) {
+        while !should_stop.load(Ordering::Relaxed) {
             if let Some(ref mut socket) = self.socket {
                 let message = socket.0.read_message();
                 match message {
@@ -235,14 +217,16 @@ impl<'a> FuturesWebSockets<'a> {
                         Message::Binary(_) => (),
                         Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
                     },
-                    Err(_) => {
+                    Err(error) => {
                         // Таймаут истек; вы можете обработать эту ситуацию, например, закрыть соединение
                         // отправляем 3 пинга если нет ответа - ошибка
-                        socket.0.write_message(Message::Ping(vec![])).unwrap();
+                        if let Err(err) = socket.0.write_message(Message::Ping(vec![])){
+                             bail!(format!("Disconnected loop is dead {err:?} {error:?}"));
+                        };
                         ping_counter += 1;
 
                         if ping_counter >= 3{
-                            bail!("Disconnected loop is dead");
+                            bail!(format!("Disconnected loop is dead {error}"));
                         }
                     }
                 }

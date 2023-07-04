@@ -6,9 +6,10 @@ use serde::{Deserialize, Serialize};
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::net::TcpStream;
-use tungstenite::{connect, Message};
+use std::time::Duration;
+use native_tls::{TlsConnector, TlsStream};
+use tungstenite::{client, Message};
 use tungstenite::protocol::WebSocket;
-use tungstenite::stream::MaybeTlsStream;
 use tungstenite::handshake::client::Response;
 
 #[allow(clippy::all)]
@@ -48,7 +49,7 @@ pub enum WebsocketEvent {
 }
 
 pub struct WebSockets<'a> {
-    pub socket: Option<(WebSocket<MaybeTlsStream<TcpStream>>, Response)>,
+    pub socket: Option<(WebSocket<TlsStream<TcpStream>>, Response)>,
     handler: Box<dyn FnMut(WebsocketEvent) -> Result<()> + 'a>,
 }
 
@@ -93,13 +94,15 @@ impl<'a> WebSockets<'a> {
 
     fn connect_wss(&mut self, wss: String) -> Result<()> {
         let url = Url::parse(&wss)?;
-        match connect(url) {
-            Ok(answer) => {
-                self.socket = Some(answer);
-                Ok(())
-            }
-            Err(e) => bail!(format!("Error during handshake {}", e)),
-        }
+        let host = url.host_str().unwrap();
+        let port = url.port().unwrap_or(443);
+        let connector = TlsConnector::new()?;
+        let tcp_stream = TcpStream::connect((host, port))?;
+        tcp_stream.set_read_timeout(Some(Duration::from_secs(10)))?; // Установите желаемый таймаут
+        let tls_stream = connector.connect(host, tcp_stream)?;
+        let (socket, response) = client(url, tls_stream)?;
+        self.socket = Some((socket, response));
+        Ok(())
     }
 
     pub fn disconnect(&mut self) -> Result<()> {
@@ -141,24 +144,43 @@ impl<'a> WebSockets<'a> {
         Ok(())
     }
 
-    pub fn event_loop(&mut self, running: &AtomicBool) -> Result<()> {
-        while running.load(Ordering::Relaxed) {
+    pub fn event_loop(&mut self, should_stop: &AtomicBool) -> Result<()> {
+        let mut ping_counter = 0;
+
+        while !should_stop.load(Ordering::Relaxed) {
             if let Some(ref mut socket) = self.socket {
-                let message = socket.0.read_message()?;
+                let message = socket.0.read_message();
                 match message {
-                    Message::Text(msg) => {
-                        if let Err(e) = self.handle_msg(&msg) {
-                            bail!(format!("Error on handling stream message: {}", e));
+                    Ok(message) => match message {
+                        Message::Text(msg) => {
+                            if let Err(e) = self.handle_msg(&msg) {
+                                bail!(format!("Error on handling stream message: {}", e));
+                            }
+                        }
+                        Message::Ping(_) => {
+                            socket.0.write_message(Message::Pong(vec![])).unwrap();
+                        }
+                        Message::Pong(_) => {
+                            ping_counter = 0;
+                        }
+                        Message::Binary(_) => (),
+                        Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
+                    },
+                    Err(error) => {
+                        // Таймаут истек; вы можете обработать эту ситуацию, например, закрыть соединение
+                        // отправляем 3 пинга если нет ответа - ошибка
+                        if let Err(err) = socket.0.write_message(Message::Ping(vec![])){
+                             bail!(format!("Disconnected loop is dead {err:?} {error:?}"));
+                        };
+                        ping_counter += 1;
+
+                        if ping_counter >= 3{
+                            bail!(format!("Disconnected loop is dead {error}"));
                         }
                     }
-                    Message::Ping(_) => {
-                        socket.0.write_message(Message::Pong(vec![])).unwrap();
-                    }
-                    Message::Pong(_) | Message::Binary(_) => (),
-                    Message::Close(e) => bail!(format!("Disconnected {:?}", e)),
                 }
             }
         }
-        Ok(())
+        bail!("running loop closed");
     }
 }

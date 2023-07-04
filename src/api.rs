@@ -6,20 +6,24 @@ use crate::futures::general::*;
 use crate::futures::market::*;
 use crate::futures::userstream::*;
 use crate::general::*;
+use crate::margin::account::MarginAccount;
 use crate::market::*;
 use crate::userstream::*;
 use crate::savings::*;
 
 #[allow(clippy::all)]
+#[derive(Clone)]
 pub enum API {
     Spot(Spot),
     Savings(Sapi),
     Futures(Futures),
+    Margin(Margin)
 }
 
 /// Endpoint for production and test orders.
 ///
 /// Orders issued to test are validated, but not sent into the matching engine.
+#[derive(Clone)]
 pub enum Spot {
     Ping,
     Time,
@@ -44,14 +48,17 @@ pub enum Spot {
     Account,
     MyTrades,
     UserDataStream,
+    CancelReplace
 }
 
+#[derive(Clone)]
 pub enum Sapi {
     AllCoins,
     AssetDetail,
     DepositAddress,
 }
 
+#[derive(Clone)]
 pub enum Futures {
     Ping,
     Time,
@@ -71,6 +78,7 @@ pub enum Futures {
     BookTicker,
     AllForceOrders,
     AllOpenOrders,
+    AllOrders,
     Order,
     PositionRisk,
     Balance,
@@ -87,6 +95,18 @@ pub enum Futures {
     Account,
     OpenOrders,
     UserDataStream,
+    ModifyOrder
+}
+
+#[derive(Clone)]
+pub enum Margin{
+    OpenOrders,
+    AllOrders,
+    Order,
+    UserDataStream,
+    UserDataStreamIsolated,
+    Account,
+    AccountIsolated
 }
 
 impl From<API> for String {
@@ -116,6 +136,8 @@ impl From<API> for String {
                 Spot::Account => "/api/v3/account",
                 Spot::MyTrades => "/api/v3/myTrades",
                 Spot::UserDataStream => "/api/v3/userDataStream",
+                Spot::CancelReplace => "/api/v3/order/cancelReplace"
+
             },
             API::Savings(route) => match route {
                 Sapi::AllCoins => "/sapi/v1/capital/config/getall",
@@ -141,6 +163,7 @@ impl From<API> for String {
                 Futures::BookTicker => "/fapi/v1/ticker/bookTicker",
                 Futures::AllForceOrders => "/fapi/v1/allForceOrders",
                 Futures::AllOpenOrders => "/fapi/v1/allOpenOrders",
+                Futures::AllOrders => "/fapi/v1/allOrders",
                 Futures::PositionSide => "/fapi/v1/positionSide/dual",
                 Futures::Order => "/fapi/v1/order",
                 Futures::PositionRisk => "/fapi/v2/positionRisk",
@@ -157,7 +180,17 @@ impl From<API> for String {
                 Futures::Account => "/fapi/v2/account",
                 Futures::OpenOrders => "/fapi/v1/openOrders",
                 Futures::UserDataStream => "/fapi/v1/listenKey",
+                Futures::ModifyOrder => "/fapi/v1/order",
             },
+            API::Margin(route) => match route{
+                Margin::OpenOrders => "/sapi/v1/margin/openOrders",
+                Margin::AllOrders => "/sapi/v1/margin/allOrders",
+                Margin::Order => "/sapi/v1/margin/order",
+                Margin::UserDataStream => "/sapi/v1/userDataStream",
+                Margin::UserDataStreamIsolated => "/sapi/v1/userDataStream/isolated",
+                Margin::Account => "/sapi/v1/margin/account",
+                Margin::AccountIsolated => "/sapi/v1/margin/isolated/account"
+            }
         })
     }
 }
@@ -236,12 +269,42 @@ impl Binance for UserStream {
     fn new_with_config(
         api_key: Option<String>, secret_key: Option<String>, config: &Config,
     ) -> UserStream {
+
+        let mut endpoint = API::Spot(Spot::UserDataStream);
+        if config.margin && config.isolated{
+            endpoint = API::Margin(Margin::UserDataStreamIsolated)
+        }else if config.margin{
+            endpoint = API::Margin(Margin::UserDataStream)
+        }
+
         UserStream {
             client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),
+            recv_window: config.recv_window,
+            endpoint,
+        }
+    }
+}
+
+// *****************************************************
+//              Binance Margin API
+// *****************************************************
+
+impl Binance for MarginAccount {
+    fn new(api_key: Option<String>, secret_key: Option<String>) -> MarginAccount {
+        Self::new_with_config(api_key, secret_key, &Config::default())
+    }
+
+    fn new_with_config(
+        api_key: Option<String>, secret_key: Option<String>, config: &Config,
+    ) -> MarginAccount {
+        MarginAccount {
+            client: Client::new(api_key, secret_key, config.rest_api_endpoint.clone()),
+            is_isolated: config.isolated,
             recv_window: config.recv_window,
         }
     }
 }
+
 
 // *****************************************************
 //              Binance Futures API
