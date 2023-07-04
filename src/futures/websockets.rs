@@ -112,15 +112,15 @@ impl<'a> FuturesWebSockets<'a> {
         }
     }
 
-    pub fn connect(&mut self, market: FuturesMarket, subscription: &'a str) -> Result<()> {
-        self.connect_wss(FuturesWebsocketAPI::Default.params(market, subscription))
+    pub fn connect<T: Into<String>>(&mut self, market: FuturesMarket, subscription: T) -> Result<()> {
+        self.connect_wss(FuturesWebsocketAPI::Default.params(market, &subscription.into()))
     }
 
-    pub fn connect_with_config(
-        &mut self, market: FuturesMarket, subscription: &'a str, config: &'a Config,
+    pub fn connect_with_config<T: Into<String>>(
+        &mut self, market: FuturesMarket, subscription: T, config: &Config,
     ) -> Result<()> {
         self.connect_wss(
-            FuturesWebsocketAPI::Custom(config.ws_endpoint.clone()).params(market, subscription),
+            FuturesWebsocketAPI::Custom(config.ws_endpoint.clone()).params(market, &subscription.into()),
         )
     }
 
