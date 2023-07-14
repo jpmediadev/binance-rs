@@ -337,6 +337,7 @@ pub struct OrderBook {
     pub last_update_id: u64,
     pub bids: Vec<Bids>,
     pub asks: Vec<Asks>,
+    pub symbol: Option<String>
 }
 
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]

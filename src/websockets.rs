@@ -1,3 +1,4 @@
+
 use crate::errors::*;
 use crate::config::*;
 use crate::model::*;
@@ -8,6 +9,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::net::TcpStream;
 use std::time::Duration;
 use native_tls::{TlsConnector, TlsStream};
+use serde_json::json;
 use tungstenite::{client, Message};
 use tungstenite::protocol::WebSocket;
 use tungstenite::handshake::client::Response;
@@ -118,12 +120,27 @@ impl<'a> WebSockets<'a> {
     }
 
     fn handle_msg(&mut self, msg: &str) -> Result<()> {
-        let value: serde_json::Value = serde_json::from_str(msg)?;
+        let mut value: serde_json::Value = serde_json::from_str(msg)?;
 
-        if let Some(data) = value.get("data") {
-            self.handle_msg(&data.to_string())?;
-            return Ok(());
+
+        if let Some(stream_value) = value.get("stream") {
+            if let Some(stream_str) = stream_value.as_str() {
+                let stream = stream_str.to_owned();
+                let parts: Vec<&str> = stream.split('@').collect();
+                if parts.len() >= 1 {
+                    let symbol = parts[0].to_uppercase();
+                    if let Some(data) = value.get_mut("data") {
+                        if data.is_object() {
+                            let data_obj = data.as_object_mut().unwrap();
+                            data_obj.insert("symbol".to_string(), json!(symbol));
+                        }
+                        self.handle_msg(&data.to_string())?;
+                        return Ok(());
+                    }
+                }
+            }
         }
+
 
         if let Ok(events) = serde_json::from_value::<Events>(value) {
             let action = match events {
