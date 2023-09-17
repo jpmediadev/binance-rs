@@ -25,6 +25,7 @@ struct OrderRequest {
     pub order_type: OrderType,
     pub time_in_force: TimeInForce,
     pub new_client_order_id: Option<String>,
+    pub iceberg_qty: Option<f64>
 }
 
 struct OrderQuoteQuantityRequest {
@@ -221,6 +222,7 @@ impl Account {
             order_type: OrderType::Limit,
             time_in_force: TimeInForce::GTC,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(buy);
         let request = build_signed_request(order, self.recv_window)?;
@@ -244,6 +246,7 @@ impl Account {
             order_type: OrderType::Limit,
             time_in_force: TimeInForce::GTC,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(buy);
         let request = build_signed_request(order, self.recv_window)?;
@@ -267,6 +270,7 @@ impl Account {
             order_type: OrderType::Limit,
             time_in_force: TimeInForce::GTC,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -290,6 +294,7 @@ impl Account {
             order_type: OrderType::Limit,
             time_in_force: TimeInForce::GTC,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -313,6 +318,7 @@ impl Account {
             order_type: OrderType::Market,
             time_in_force: TimeInForce::GTC,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(buy);
         let request = build_signed_request(order, self.recv_window)?;
@@ -336,6 +342,7 @@ impl Account {
             order_type: OrderType::Market,
             time_in_force: TimeInForce::GTC,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(buy);
         let request = build_signed_request(order, self.recv_window)?;
@@ -407,6 +414,7 @@ impl Account {
             order_type: OrderType::Market,
             time_in_force: TimeInForce::GTC,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -430,6 +438,7 @@ impl Account {
             order_type: OrderType::Market,
             time_in_force: TimeInForce::GTC,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -516,6 +525,7 @@ impl Account {
             order_type: OrderType::StopLossLimit,
             time_in_force,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -554,6 +564,7 @@ impl Account {
             order_type: OrderType::StopLossLimit,
             time_in_force,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -592,6 +603,7 @@ impl Account {
             order_type: OrderType::StopLossLimit,
             time_in_force,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -630,6 +642,7 @@ impl Account {
             order_type: OrderType::StopLossLimit,
             time_in_force,
             new_client_order_id: None,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -673,6 +686,7 @@ impl Account {
     pub fn custom_order<S, F>(
         &self, symbol: S, qty: F, price: f64, stop_price: Option<f64>, order_side: OrderSide,
         order_type: OrderType, time_in_force: TimeInForce, new_client_order_id: Option<String>,
+        iceberg_qty: Option<f64>
     ) -> Result<Transaction>
     where
         S: Into<String>,
@@ -687,6 +701,7 @@ impl Account {
             order_type,
             time_in_force,
             new_client_order_id,
+            iceberg_qty,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -714,6 +729,7 @@ impl Account {
             order_type,
             time_in_force,
             new_client_order_id,
+            iceberg_qty: None,
         };
         let order = self.build_order(sell);
         let request = build_signed_request(order, self.recv_window)?;
@@ -799,6 +815,10 @@ impl Account {
             order_parameters.insert("newClientOrderId".into(), client_order_id);
         }
 
+        if let Some(iceberg_qty) = order.iceberg_qty {
+            order_parameters.insert("icebergQty".into(), iceberg_qty.to_string());
+        }
+
         order_parameters
     }
 
@@ -824,3 +844,4 @@ impl Account {
         order_parameters
     }
 }
+

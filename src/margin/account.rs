@@ -78,7 +78,7 @@ impl MarginAccount {
     pub fn custom_order<S>(
         &self, symbol: S, qty: f64, price: f64, stop_price: Option<f64>, order_side: OrderSide,
         order_type: OrderType, time_in_force: TimeInForce, new_client_order_id: Option<String>,
-        side_effect: SideEffectType
+        side_effect: SideEffectType, iceberg_qty: Option<f64>
     ) -> Result<Transaction>
     where
         S: Into<String>,
@@ -102,6 +102,10 @@ impl MarginAccount {
 
         if let Some(client_order_id) = new_client_order_id {
             parameters.insert("newClientOrderId".into(), client_order_id);
+        }
+
+         if let Some(iceberg) = iceberg_qty {
+            parameters.insert("icebergQty".into(), iceberg.to_string());
         }
 
         let request = build_signed_request(parameters, self.recv_window)?;

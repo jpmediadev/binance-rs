@@ -721,6 +721,7 @@ mod tests {
                 OrderType::Market,
                 TimeInForce::GTC,
                 Some("6gCrw2kRUAF9CvJDGP16IP".into()),
+                None
             )
             .unwrap();
 
