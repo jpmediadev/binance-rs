@@ -685,8 +685,9 @@ impl Account {
     #[allow(clippy::too_many_arguments)]
     pub fn custom_order<S, F>(
         &self, symbol: S, qty: F, price: f64, stop_price: Option<f64>, order_side: OrderSide,
-        order_type: OrderType, time_in_force: TimeInForce, new_client_order_id: Option<String>,
-        iceberg_qty: Option<f64>
+        order_type: OrderType, time_in_force: TimeInForce,  iceberg_qty: Option<f64>,
+        new_client_order_id: Option<String>,
+
     ) -> Result<Transaction>
     where
         S: Into<String>,
