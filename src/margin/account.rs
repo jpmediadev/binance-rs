@@ -17,6 +17,20 @@ pub struct MarginAccount {
 
 impl MarginAccount {
 
+    // Account Information
+    pub fn get_account(&self) -> Result<MarginAccountInformation> {
+        let request = build_signed_request(BTreeMap::new(), self.recv_window)?;
+        self.client
+            .get_signed(API::Margin(Margin::Account), Some(request))
+    }
+
+    // Account Information
+    pub fn get_isolated_account(&self) -> Result<IsoMarginAccountInformation> {
+        let request = build_signed_request(BTreeMap::new(), self.recv_window)?;
+        self.client
+            .get_signed(API::Margin(Margin::AccountIsolated), Some(request))
+    }
+
     // Current open orders for ONE symbol
     pub fn get_open_orders<S>(&self, symbol: S) -> Result<Vec<Order>>
     where

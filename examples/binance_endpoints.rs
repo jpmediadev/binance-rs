@@ -6,15 +6,18 @@ use binance::account::*;
 use binance::market::*;
 use binance::model::KlineSummary;
 use binance::errors::ErrorKind as BinanceLibErrorKind;
+use binance::margin::account::MarginAccount;
 
 fn main() {
     // The general spot API endpoints; shown with
     // testnet=false and testnet=true
-    general(false);
-    general(true);
+    //general(false);
+    //general(true);
 
     // The market data API endpoint
-    market_data();
+    //market_data();
+
+    account_only();
 
     // The account data API and savings API endpoint examples need an API key. Change those lines locally
     // and uncomment the line below (and do not commit your api key :)).
@@ -62,6 +65,23 @@ fn general(use_testnet: bool) {
         Ok(answer) => println!("Symbol information: {:?}", answer),
         Err(e) => println!("Error: {}", e),
     }
+}
+
+#[allow(dead_code)]
+fn account_only() {
+
+
+    // let cfg = Config::default().set_margin(true).set_isolated(true);
+    //
+    // let account: MarginAccount = Binance::new_with_config(api_key, secret_key, &cfg);
+    //
+    // match account.get_isolated_account() {
+    //     Ok(answer) => {
+    //         println!("{:?}", &answer);
+    //         answer.assets.iter().filter(|a| a.base_asset.asset == "BTC").for_each(|a| println!("{:?}", a));
+    //     },
+    //     Err(e) => println!("Error: {}", e),
+    // }
 }
 
 #[allow(dead_code)]

@@ -143,6 +143,76 @@ pub struct AccountInformation {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct IsolatedMarginAsset {
+    pub base_asset: MarginAsset,
+    pub quote_asset: MarginAsset,
+
+    pub symbol: String,
+    pub enabled: bool,
+    #[serde(with = "string_or_float")]
+    pub margin_level: f64,
+    pub margin_level_status: String,
+    #[serde(with = "string_or_float")]
+    pub margin_ratio: f64,
+    #[serde(with = "string_or_float")]
+    pub index_price: f64,
+    #[serde(with = "string_or_float")]
+    pub liquidate_price: f64,
+    #[serde(with = "string_or_float")]
+    pub liquidate_rate: f64,
+    pub trade_enabled: bool,
+
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct IsoMarginAccountInformation {
+    #[serde(with = "string_or_float")]
+    pub total_asset_of_btc: f64,
+    #[serde(with = "string_or_float")]
+    pub total_liability_of_btc: f64,
+    #[serde(with = "string_or_float")]
+    pub total_net_asset_of_btc: f64,
+    pub assets: Vec<IsolatedMarginAsset>
+
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginAsset {
+    pub asset: String,
+    #[serde(with = "string_or_float")]
+    pub borrowed: f64,
+    #[serde(with = "string_or_float")]
+    pub free: f64,
+    #[serde(with = "string_or_float")]
+    pub interest: f64,
+    #[serde(with = "string_or_float")]
+    pub locked: f64,
+    #[serde(with = "string_or_float")]
+    pub net_asset: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MarginAccountInformation {
+    pub borrow_enabled: bool,
+    #[serde(with = "string_or_float")]
+    pub margin_level: f64,
+    #[serde(with = "string_or_float")]
+    pub total_asset_of_btc: f64,
+    #[serde(with = "string_or_float")]
+    pub total_liability_of_btc: f64,
+    #[serde(with = "string_or_float")]
+    pub total_net_asset_of_btc: f64,
+    pub trade_enabled: bool,
+    pub transfer_enabled: bool,
+    #[serde(alias = "user_assets")]
+    pub assets: Vec<MarginAsset>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Balance {
     pub asset: String,
     pub free: String,

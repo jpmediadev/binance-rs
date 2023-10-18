@@ -4,10 +4,11 @@ use binance::futures::market::*;
 use binance::futures::model::*;
 use binance::errors::ErrorKind as BinanceLibErrorKind;
 
+
 fn main() {
-    general();
-    //account();
-    market_data();
+    //general();
+    account_only();
+    //market_data();
 }
 
 fn general() {
@@ -41,6 +42,18 @@ fn general() {
         Ok(answer) => println!("Symbol information: {:?}", answer),
         Err(e) => println!("Error: {}", e),
     }
+}
+
+#[allow(dead_code)]
+fn account_only() {
+
+    //
+    // let account: FuturesAccount = Binance::new(api_key, secret_key);
+    //
+    // match account.account_information() {
+    //     Ok(answer) => println!("{:#?}", answer.assets),
+    //     Err(e) => println!("Error: {}", e),
+    // }
 }
 
 fn market_data() {
