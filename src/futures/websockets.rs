@@ -225,7 +225,7 @@ impl<'a> FuturesWebSockets<'a> {
                         };
                         ping_counter += 1;
 
-                        if ping_counter >= 3{
+                        if ping_counter >= 10{
                             bail!(format!("Disconnected loop is dead {error}"));
                         }
                     }
