@@ -863,6 +863,9 @@ pub struct MarkPriceEvent {
     pub symbol: String,
 }
 
+
+
+
 // Object({"E": Number(1626118018407), "e": String("forceOrder"), "o": Object({"S": String("SELL"), "T": Number(1626118018404), "X": String("FILLED"), "ap": String("33028.07"), "f": String("IOC"), "l": String("0.010"), "o": String("LIMIT"), "p": String("32896.00"), "q": String("0.010"), "s": String("BTCUSDT"), "z": String("0.010")})})
 // https://binance-docs.github.io/apidocs/futures/en/#liquidation-order-streams
 
@@ -897,24 +900,25 @@ pub struct LiquidationOrder {
     #[serde(rename = "q")]
     pub original_quantity: String,
 
-    #[serde(rename = "p")]
-    pub price: String,
+    #[serde(rename = "p",  with = "string_or_float")]
+    pub price: f64,
 
-    #[serde(rename = "ap")]
-    pub average_price: String,
+    #[serde(rename = "ap",  with = "string_or_float")]
+    pub average_price: f64,
 
     #[serde(rename = "X")]
     pub order_status: String,
 
-    #[serde(rename = "l")]
-    pub order_last_filled_quantity: String,
+    #[serde(rename = "l",  with = "string_or_float")]
+    pub order_last_filled_quantity: f64,
 
-    #[serde(rename = "z")]
-    pub order_filled_accumulated_quantity: String,
+    #[serde(rename = "z",  with = "string_or_float")]
+    pub order_filled_accumulated_quantity: f64,
 
     #[serde(rename = "T")]
     pub order_trade_time: u64,
 }
+
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
