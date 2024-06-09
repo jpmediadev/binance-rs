@@ -326,7 +326,7 @@ impl FuturesAccount {
     }
 
     // Modify Order
-    pub fn modify_order<S>(&self, symbol: S, side: OrderSide, price: f64, quantity: f64, client_order_id: S, is_close_position: bool) -> Result<Transaction>
+    pub fn modify_order<S>(&self, symbol: S, side: OrderSide, price: f64, quantity: f64, client_order_id: S, _is_close_position: bool) -> Result<Transaction>
      where
         S: Into<String>,
     {
@@ -338,7 +338,7 @@ impl FuturesAccount {
         //parameters.insert("type".into(), OrderType::Limit.into());
 
         //if !is_close_position{
-        //    parameters.insert("quantity".into(), quantity.to_string());
+        parameters.insert("quantity".into(), quantity.to_string());
         //}
 
         let request = build_signed_request(parameters, self.recv_window)?;
