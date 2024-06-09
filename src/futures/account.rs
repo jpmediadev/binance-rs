@@ -337,9 +337,9 @@ impl FuturesAccount {
         parameters.insert("origClientOrderId".into(), client_order_id.into());
         //parameters.insert("type".into(), OrderType::Limit.into());
 
-        if !is_close_position{
-            parameters.insert("quantity".into(), quantity.to_string());
-        }
+        //if !is_close_position{
+        //    parameters.insert("quantity".into(), quantity.to_string());
+        //}
 
         let request = build_signed_request(parameters, self.recv_window)?;
         self.client
