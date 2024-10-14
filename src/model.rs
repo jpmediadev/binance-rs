@@ -814,7 +814,7 @@ pub struct TradeEvent {
     #[serde(rename = "m")]
     pub is_buyer_maker: bool,
 
-    #[serde(skip, rename = "M")]
+    #[serde(rename = "M")]
     pub m_ignore: Option<bool>,
 }
 
@@ -841,8 +841,8 @@ pub struct MarkPriceEvent {
     #[serde(rename = "E")]
     pub event_time: u64,
 
-    #[serde(rename = "P")]
-    pub estimate_settle_price: String,
+    #[serde(rename = "P",  with = "string_or_float")]
+    pub estimate_settle_price: f64,
 
     #[serde(rename = "T")]
     pub next_funding_time: u64,
@@ -856,8 +856,8 @@ pub struct MarkPriceEvent {
     #[serde(rename = "p")]
     pub mark_price: String,
 
-    #[serde(rename = "r")]
-    pub funding_rate: String,
+    #[serde(rename = "r",  with = "string_or_float")]
+    pub funding_rate: f64,
 
     #[serde(rename = "s")]
     pub symbol: String,
