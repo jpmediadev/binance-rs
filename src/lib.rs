@@ -10,7 +10,7 @@
 #[macro_use]
 extern crate error_chain;
 
-mod client;
+pub mod client;
 pub mod errors;
 pub mod util;
 
