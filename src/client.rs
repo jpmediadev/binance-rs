@@ -1,3 +1,4 @@
+use std::time::Duration;
 use hex::encode as hex_encode;
 use hmac::{Hmac, Mac, NewMac};
 use crate::errors::*;
@@ -23,7 +24,10 @@ impl Client {
             secret_key: secret_key.unwrap_or_else(|| "".into()),
             host,
             inner_client: reqwest::blocking::Client::builder()
-                .pool_idle_timeout(None)
+                .pool_idle_timeout(Some(Duration::from_secs(30)))  // Разумный таймаут для бездействующих соединений
+                .tcp_keepalive(Some(Duration::from_secs(5)))  // Уменьшенный keepalive для быстрой проверки активности соединения
+                .pool_max_idle_per_host(20)  // Увеличенный пул соединений для уменьшения времени открытия новых соединений
+                .timeout(Duration::from_millis(1000))  // Короткий таймаут для запроса (можно настроить на основании тестирования)
                 .build()
                 .unwrap(),
         }

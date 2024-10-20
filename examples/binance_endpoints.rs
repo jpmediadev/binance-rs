@@ -6,7 +6,8 @@ use binance::account::*;
 use binance::market::*;
 use binance::model::KlineSummary;
 use binance::errors::ErrorKind as BinanceLibErrorKind;
-use binance::margin::account::MarginAccount;
+use binance::futures::market::FuturesMarket;
+
 
 fn main() {
     // The general spot API endpoints; shown with
@@ -263,3 +264,23 @@ fn market_data() {
         Err(e) => println!("Error: {}", e),
     }
 }
+
+
+    #[test]
+    fn get_custom_depth() {
+
+        let market: Market =  Binance::new(None, None);
+
+        let order_book = market.get_custom_depth("LTCBTC", 10).unwrap();
+        println!("{:#?}", order_book)
+    }
+
+
+    #[test]
+    fn get_custom_depth_futures() {
+
+        let market: FuturesMarket =  Binance::new(None, None);
+
+        let order_book = market.get_custom_depth("LTCUSDT", 10).unwrap();
+        println!("{:#?}", order_book)
+    }
