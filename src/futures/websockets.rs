@@ -201,11 +201,8 @@ impl<'a> FuturesWebSockets<'a> {
         while !should_stop.load(Ordering::Relaxed) {
             if let Some(ref mut socket) = self.socket {
                 let message = socket.0.read_message();
-
-                println!("{:?}", &message);
                 match message {
                     Ok(message) => match message {
-
                         Message::Text(msg) => {
                             if let Err(e) = self.handle_msg(&msg) {
                                 bail!(format!("Error on handling stream message: {}", e));
